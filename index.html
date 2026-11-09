@@ -337,6 +337,37 @@ tr.clickable:hover td{background:color-mix(in srgb,var(--text) 4%,transparent)}
 .gate h3{margin:0 0 6px;font-family:var(--f-head)}
 .gate p{color:var(--muted);margin:0 auto 14px;max-width:460px}
 .modal .box input{margin-top:12px}
+
+/* ---------- Écran de connexion ---------- */
+body.gated .app,body.gated nav.bottom{visibility:hidden}
+.gate-screen{position:fixed;inset:0;z-index:60;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:24px 16px calc(24px + env(safe-area-inset-bottom));background:var(--bg)}
+.gate-screen::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(700px 380px at 20% -5%, color-mix(in srgb,var(--accent) 20%,transparent),transparent 70%),
+             radial-gradient(600px 340px at 110% 105%, color-mix(in srgb,var(--brass) 12%,transparent),transparent 70%)}
+.gate-card{position:relative;width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:26px 22px 22px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.gate-brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;margin-bottom:22px}
+.gate-brand .crest{width:62px;height:62px;border-radius:18px}
+.gate-brand .crest svg{width:34px;height:34px}
+.gate-brand h1{margin:0;font-family:var(--f-head);font-size:1.45rem;letter-spacing:.06em}
+.gate-brand p{margin:0;color:var(--muted);font-size:.9rem}
+.gate-card h2{margin:0 0 14px;font-size:1.05rem;font-weight:600}
+.gate-card .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.gate-card .field .n{font-size:.8rem;color:var(--muted);letter-spacing:.02em}
+.gate-card input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 13px;font-size:1rem;outline:none}
+.gate-card input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.gate-card .btn.primary{width:100%;justify-content:center;padding:13px;font-size:1rem;margin-top:4px}
+.gate-links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
+.gate-links button{appearance:none;background:none;border:0;padding:4px 0;color:var(--accent);cursor:pointer;font-size:.88rem}
+.gate-msg{min-height:1.2em;margin-top:12px;font-size:.88rem;color:var(--muted)}
+.gate-msg.err{color:var(--danger)} .gate-msg.ok{color:var(--tuee)}
+.gate-small{color:var(--dim);font-size:.78rem;text-align:center;margin:16px 0 0}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:46px}
+.pw-wrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.hist-table td{font-size:.86rem;vertical-align:top}
+.hist-table td small{display:block;color:var(--dim);font-size:.74rem}
+.adm-meta{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--dim);font-size:.76rem;margin-top:3px}
+.adm-meta code{font-size:.74rem;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -373,6 +404,7 @@ tr.clickable:hover td{background:color-mix(in srgb,var(--text) 4%,transparent)}
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
   <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4.3L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.7 4.3L21 15"/><path d="M21 20v-5h-5"/></symbol>
   <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 21h8M9 17h6"/></symbol>
@@ -611,7 +643,13 @@ tr.clickable:hover td{background:color-mix(in srgb,var(--text) 4%,transparent)}
     <div class="panel hidden" id="adminPanel" style="margin-top:14px">
       <div class="panel-head"><h3><span class="ico" style="color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,transparent)"><svg class="i"><use href="#i-shield"/></svg></span>Administration</h3><span class="meta" id="adminMeta"></span></div>
       <div id="adminList"></div>
-      <div class="hint">Les nouveaux inscrits sont « en attente » : validez-les pour qu’ils voient et rejoignent le classement. Un membre bloqué garde son carnet personnel mais n’accède plus au groupe.</div>
+      <div class="hint">Les nouveaux inscrits sont « en attente » : validez-les pour qu’ils voient et rejoignent le classement. Un membre bloqué garde son carnet personnel mais n’accède plus au groupe. Les mots de passe sont chiffrés : personne ne peut les lire, mais vous pouvez envoyer à un membre un lien pour en choisir un nouveau.</div>
+    </div>
+    <div class="panel hidden" id="histPanel" style="margin-top:14px">
+      <div class="panel-head"><h3><span class="ico" style="color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,transparent)"><svg class="i"><use href="#i-clock"/></svg></span>Historique des connexions</h3>
+        <div class="btn-row" style="margin:0;align-items:center"><select id="histFilter" style="width:auto"></select><button class="btn icon sm" id="histRefresh" title="Actualiser"><svg class="i"><use href="#i-sync"/></svg></button></div></div>
+      <div class="scroll"><table class="hist-table"><thead><tr><th>Date et heure</th><th>Membre</th><th>Résultat</th><th>Appareil</th><th>Adresse IP</th></tr></thead><tbody id="histBody"></tbody></table></div>
+      <div class="hint" id="histMeta"></div>
     </div>
   </section>
 
@@ -708,6 +746,17 @@ tr.clickable:hover td{background:color-mix(in srgb,var(--text) 4%,transparent)}
   <button data-view="groupe"><span class="pill"><svg class="i"><use href="#i-users"/></svg></span>Groupe</button>
   <button data-view="regl"><span class="pill"><svg class="i"><use href="#i-set"/></svg></span>Réglages</button>
 </nav>
+
+<div class="gate-screen hidden" id="loginGate" role="dialog" aria-modal="true" aria-label="Connexion">
+  <div class="gate-card">
+    <div class="gate-brand">
+      <div class="crest"><svg class="i"><use href="#i-crest"/></svg></div>
+      <h1>CHASSE NOTE</h1>
+      <p>Carnet de chasse partagé</p>
+    </div>
+    <div id="gateBody"><p class="gate-msg">Chargement…</p></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1531,6 +1580,8 @@ function errFr(e){
   if(/Password should be at least/i.test(m))return"Le mot de passe doit faire au moins 6 caractères.";
   if(/rate limit|too many/i.test(m))return"Trop de tentatives, réessayez dans quelques minutes.";
   if(/Failed to fetch|NetworkError|Load failed/i.test(m))return"Pas de connexion Internet.";
+  if(/profils_identifiant_uniq|duplicate key/i.test(m))return"Cet identifiant est déjà pris.";
+  if(/profils_identifiant_format/i.test(m))return"Identifiant invalide : 3 à 30 caractères, lettres minuscules, chiffres, point, tiret.";
   return m;
 }
 function currentView(){return VIEWS.find(v=>!$("view-"+v).classList.contains("hidden"))||"dash";}
@@ -1542,7 +1593,8 @@ function rerender(){
 /* ---------- Démarrage de la connexion ---------- */
 function initCloud(){
   if(!CFG_OK){setSync("local");return;}
-  if(!window.supabase){setSync("offline","service de comptes injoignable");renderAccount();return;}
+  showGate("loading");
+  if(!window.supabase){setSync("offline","service de comptes injoignable");renderAccount();showGate("offline");return;}
   SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   setSync("out");
   const h=new URLSearchParams(location.hash.slice(1));
@@ -1552,6 +1604,7 @@ function initCloud(){
     const u=session?session.user:null;
     const changed=(u?u.id:null)!==(USER?USER.id:null);
     USER=u;
+    if(u)hideGate();else if(ev!=="PASSWORD_RECOVERY")showGate("login");
     if(!changed)return;
     if(u)setTimeout(afterLogin,0);
     else{PROFIL=null;setSync("out");renderAccount();if(currentView()==="groupe")renderGroupe();}
@@ -1676,6 +1729,118 @@ async function pullIfNewer(){
   }else setSync("ok");
 }
 
+/* ---------- Écran de connexion (première page) ---------- */
+const IDENT_RE=/^[a-z0-9._-]{3,30}$/;
+function normIdent(v){return String(v||"").trim().toLowerCase();}
+let GATE_MODE=null;
+function hideGate(){GATE_MODE=null;$("loginGate").classList.add("hidden");document.body.classList.remove("gated");}
+function showGate(mode){
+  if(!CFG_OK)return;
+  $("loginGate").classList.remove("hidden");document.body.classList.add("gated");
+  if(mode===GATE_MODE&&mode!=="loading")return;
+  GATE_MODE=mode;renderGate();
+}
+function pwField(id,label,ac){
+  return'<label class="field"><span class="n">'+label+'</span><span class="pw-wrap"><input type="password" id="'+id+'" autocomplete="'+ac+'" /><button type="button" class="eye" data-eye="'+id+'" aria-label="Afficher le mot de passe">'+ico("i-eye")+'</button></span></label>';
+}
+function gateMsg(t,kind){const m=$("gMsg");if(!m)return;m.textContent=t||"";m.className="gate-msg"+(kind?" "+kind:"");}
+function lastIdent(){return sGet("chasseNote.dernierIdentifiant")||"";}
+function renderGate(){
+  const b=$("gateBody"),mode=GATE_MODE;
+  const offlineLink=!navigator.onLine||!SB?'<p class="gate-small"><button class="btn ghost sm" id="gOffline" style="margin-top:6px">Continuer hors ligne sur cet appareil</button></p>':"";
+  if(mode==="loading"){b.innerHTML='<p class="gate-msg" style="text-align:center">Chargement…</p>';return;}
+  if(mode==="offline"){
+    b.innerHTML='<h2>Pas de connexion</h2><p class="gate-msg">Le service de connexion n’est pas joignable. Vous pouvez continuer avec le carnet enregistré sur cet appareil ; il se synchronisera à la prochaine connexion.</p>'+
+      '<button class="btn primary" id="gRetry" style="width:100%;justify-content:center;margin-top:12px">Réessayer</button>'+offlineLink;
+    $("gRetry").onclick=()=>location.reload();
+  }else if(mode==="signup"){
+    b.innerHTML='<h2>Créer un compte</h2>'+
+      '<label class="field"><span class="n">Identifiant (pour se connecter)</span><input id="gIdent" autocapitalize="none" autocomplete="username" placeholder="ex. dupont.j" /></label>'+
+      '<label class="field"><span class="n">Pseudo (affiché au groupe)</span><input id="gPseudo" autocomplete="nickname" value="'+esc(DB.settings.nom||"")+'" /></label>'+
+      '<label class="field"><span class="n">E-mail (confirmation et mot de passe oublié)</span><input type="email" id="gEmail" autocomplete="email" inputmode="email" /></label>'+
+      pwField("gPass","Mot de passe (6 caractères minimum)","new-password")+pwField("gPass2","Confirmer le mot de passe","new-password")+
+      '<button class="btn primary" id="gGo">Créer mon compte</button><div class="gate-msg" id="gMsg"></div>'+
+      '<div class="gate-links"><button id="gToLogin">← J’ai déjà un compte</button></div>';
+    $("gToLogin").onclick=()=>showGate("login");
+    $("gGo").onclick=doSignup;
+  }else if(mode==="forgot"){
+    b.innerHTML='<h2>Mot de passe oublié</h2><p class="gate-msg" style="margin:0 0 12px">Un lien pour choisir un nouveau mot de passe sera envoyé à l’e-mail du compte.</p>'+
+      '<label class="field"><span class="n">Identifiant ou e-mail</span><input id="gIdent" autocapitalize="none" autocomplete="username" value="'+esc(lastIdent())+'" /></label>'+
+      '<button class="btn primary" id="gGo">Envoyer le lien</button><div class="gate-msg" id="gMsg"></div>'+
+      '<div class="gate-links"><button id="gToLogin">← Retour à la connexion</button></div>';
+    $("gToLogin").onclick=()=>showGate("login");
+    $("gGo").onclick=doForgot;
+  }else{
+    b.innerHTML='<h2>Connexion</h2>'+
+      '<label class="field"><span class="n">Identifiant</span><input id="gIdent" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" value="'+esc(lastIdent())+'" /></label>'+
+      pwField("gPass","Mot de passe","current-password")+
+      '<button class="btn primary" id="gGo">Se connecter</button><div class="gate-msg" id="gMsg"></div>'+
+      '<div class="gate-links"><button id="gForgot">Mot de passe oublié ?</button><button id="gToSignup">Créer un compte</button></div>'+offlineLink;
+    $("gForgot").onclick=()=>showGate("forgot");
+    $("gToSignup").onclick=()=>showGate("signup");
+    $("gGo").onclick=doLogin;
+  }
+  b.querySelectorAll("[data-eye]").forEach(x=>x.onclick=()=>{const i=$(x.dataset.eye);i.type=i.type==="password"?"text":"password";});
+  b.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"&&$("gGo"))$("gGo").click();}));
+  const off=$("gOffline");if(off)off.onclick=()=>{hideGate();toast("Mode hors ligne : données de cet appareil");};
+  const first=b.querySelector("input");if(first&&mode!=="offline")setTimeout(()=>{const p=$("gPass");(mode==="login"&&first.value&&p?p:first).focus();},50);
+}
+async function emailFor(ident){
+  if(ident.includes("@"))return ident;
+  const r=await SB.rpc("email_pour_identifiant",{p:ident});
+  if(r.error)throw r.error;
+  return r.data||null;
+}
+function noterEchec(ident){SB.rpc("noter_echec",{p_identifiant:ident,p_appareil:navigator.userAgent}).then(()=>{},()=>{});}
+async function doLogin(){
+  const ident=normIdent($("gIdent").value),pass=$("gPass").value;
+  if(!ident||!pass)return gateMsg("Saisissez votre identifiant et votre mot de passe.","err");
+  const btn=$("gGo");btn.disabled=true;gateMsg("Connexion…");
+  try{
+    const email=await emailFor(ident);
+    if(!email){noterEchec(ident);btn.disabled=false;return gateMsg("Identifiant ou mot de passe incorrect.","err");}
+    const r=await SB.auth.signInWithPassword({email:email,password:pass});
+    if(r.error){
+      if(/Invalid login credentials/i.test(r.error.message))noterEchec(ident);
+      btn.disabled=false;return gateMsg(/Invalid login credentials/i.test(r.error.message)?"Identifiant ou mot de passe incorrect.":errFr(r.error),"err");
+    }
+    sSet("chasseNote.dernierIdentifiant",ident);
+  }catch(e){btn.disabled=false;gateMsg(errFr(e),"err");}
+}
+async function doSignup(){
+  const ident=normIdent($("gIdent").value),pseudo=$("gPseudo").value.trim(),email=$("gEmail").value.trim(),p1=$("gPass").value,p2=$("gPass2").value;
+  if(!IDENT_RE.test(ident))return gateMsg("Identifiant : 3 à 30 caractères, lettres minuscules, chiffres, point ou tiret (ex. dupont.j).","err");
+  if(!pseudo)return gateMsg("Choisissez un pseudo : c’est le nom affiché dans le classement.","err");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return gateMsg("Saisissez une adresse e-mail valide.","err");
+  if(p1.length<6)return gateMsg("Le mot de passe doit faire au moins 6 caractères.","err");
+  if(p1!==p2)return gateMsg("Les deux mots de passe ne correspondent pas.","err");
+  const btn=$("gGo");btn.disabled=true;gateMsg("Création du compte…");
+  try{
+    const lib=await SB.rpc("identifiant_libre",{p:ident});
+    if(lib.error)throw lib.error;
+    if(!lib.data){btn.disabled=false;return gateMsg("Cet identifiant est déjà pris, choisissez-en un autre.","err");}
+    const r=await SB.auth.signUp({email:email,password:p1,options:{data:{pseudo:pseudo,identifiant:ident},emailRedirectTo:BASE_URL}});
+    if(r.error)throw r.error;
+    sSet("chasseNote.dernierIdentifiant",ident);
+    if(!r.data.session){
+      GATE_MODE=null;showGate("login");
+      gateMsg("Compte créé. Ouvrez le lien de confirmation reçu par e-mail (pensez aux spams), puis connectez-vous.","ok");
+    }
+  }catch(e){btn.disabled=false;gateMsg(errFr(e),"err");}
+}
+async function doForgot(){
+  const ident=normIdent($("gIdent").value);
+  if(!ident)return gateMsg("Saisissez votre identifiant ou votre e-mail.","err");
+  const btn=$("gGo");btn.disabled=true;gateMsg("Envoi…");
+  try{
+    const email=await emailFor(ident);
+    if(email){const r=await SB.auth.resetPasswordForEmail(email,{redirectTo:BASE_URL});if(r.error)throw r.error;}
+    gateMsg("Si ce compte existe, un lien a été envoyé à son adresse e-mail.","ok");
+  }catch(e){btn.disabled=false;gateMsg(errFr(e),"err");}
+}
+window.addEventListener("online",()=>{if(GATE_MODE)renderGate();});
+window.addEventListener("offline",()=>{if(GATE_MODE)renderGate();});
+
 /* ---------- Panneau compte ---------- */
 function renderAccount(){
   const b=$("accountBox");
@@ -1685,40 +1850,27 @@ function renderAccount(){
   }
   if(!SB){b.innerHTML='<p class="steps-mini">Le service de comptes n’a pas pu être chargé (pas de réseau ?). Votre carnet reste utilisable ici ; rechargez la page une fois connecté à Internet.</p>';return;}
   if(!USER){
-    b.innerHTML='<p class="steps-mini" style="margin-bottom:12px">Connectez-vous pour sauvegarder votre carnet en ligne, le retrouver sur tous vos appareils et partager vos statistiques avec le groupe.</p>'+
-      '<div class="fgrid"><label class="field s2 s2m"><span class="n">E-mail</span><input type="email" id="aEmail" autocomplete="email" inputmode="email" /></label>'+
-      '<label class="field s2 s2m"><span class="n">Mot de passe</span><input type="password" id="aPass" autocomplete="current-password" /></label>'+
-      '<label class="field s2 s2m"><span class="n">Pseudo <small style="color:var(--dim)">(seulement pour créer un compte)</small></span><input id="aPseudo" autocomplete="nickname" value="'+esc(DB.settings.nom||"")+'" /></label></div>'+
-      '<div class="btn-row" style="margin-top:0"><button class="btn primary" id="aLogin">Se connecter</button><button class="btn gold" id="aSignup">Créer un compte</button><button class="btn ghost" id="aForgot">Mot de passe oublié</button></div>'+
-      '<div class="hint" id="aHint"></div>';
-    const hint=t=>{$("aHint").textContent=t;};
-    const creds=()=>({email:$("aEmail").value.trim(),password:$("aPass").value});
-    $("aLogin").onclick=async()=>{const c=creds();if(!c.email||!c.password)return hint("Renseignez l’e-mail et le mot de passe.");hint("Connexion…");const r=await SB.auth.signInWithPassword(c);if(r.error)hint(errFr(r.error));};
-    $("aSignup").onclick=async()=>{
-      const c=creds(),pseudo=$("aPseudo").value.trim();
-      if(!c.email||!c.password)return hint("Renseignez l’e-mail et un mot de passe (6 caractères minimum).");
-      if(!pseudo)return hint("Choisissez un pseudo : c’est le nom affiché dans le classement.");
-      hint("Création du compte…");
-      const r=await SB.auth.signUp({email:c.email,password:c.password,options:{data:{pseudo:pseudo},emailRedirectTo:BASE_URL}});
-      if(r.error)return hint(errFr(r.error));
-      if(!r.data.session)hint("Compte créé. Ouvrez le lien de confirmation reçu par e-mail (pensez aux spams), puis connectez-vous.");
-    };
-    $("aForgot").onclick=async()=>{const email=$("aEmail").value.trim();if(!email)return hint("Saisissez d’abord votre e-mail.");const r=await SB.auth.resetPasswordForEmail(email,{redirectTo:BASE_URL});hint(r.error?errFr(r.error):"Un lien de réinitialisation vous a été envoyé par e-mail.");};
+    b.innerHTML='<p class="steps-mini" style="margin-bottom:12px">Vous utilisez le carnet sans être connecté : les données restent sur cet appareil.</p><button class="btn primary" id="aOpenGate">'+ico("i-user")+'Se connecter</button>';
+    $("aOpenGate").onclick=()=>showGate(SB?"login":"offline");
     return;
   }
   const p=PROFIL||{pseudo:"",commune:"",role:"membre",statut:"en_attente",partage:true};
   const stChip={actif:'<span class="chip ok">Membre actif</span>',en_attente:'<span class="chip warn">En attente de validation</span>',bloque:'<span class="chip bad">Accès au groupe bloqué</span>'}[p.statut]||"";
-  b.innerHTML='<div class="who"><div class="avatar">'+esc(initials(p.pseudo||USER.email))+'</div><div style="min-width:0"><div class="nm">'+esc(p.pseudo||"Sans pseudo")+'</div><small>'+esc(USER.email)+'</small></div></div>'+
+  b.innerHTML='<div class="who"><div class="avatar">'+esc(initials(p.pseudo||USER.email))+'</div><div style="min-width:0"><div class="nm">'+esc(p.pseudo||"Sans pseudo")+'</div><small>'+(p.identifiant?"Identifiant : "+esc(p.identifiant)+" · ":"")+esc(USER.email)+'</small></div></div>'+
     '<div class="toggles" style="margin:12px 0">'+(p.role==="admin"?'<span class="chip" style="color:var(--brass)">'+ico("i-shield","width:14px;height:14px")+'Administrateur</span>':'<span class="chip">Membre</span>')+stChip+'</div>'+
     (p.statut==="en_attente"?'<p class="steps-mini" style="margin-bottom:12px">Votre carnet est déjà sauvegardé en ligne. L’administrateur doit valider votre compte pour que vous rejoigniez le classement du groupe.</p>':"")+
-    '<div class="fgrid"><label class="field s2 s2m"><span class="n">Pseudo (affiché au groupe)</span><input id="aPseudoEd" value="'+esc(p.pseudo)+'" /></label>'+
+    '<div class="fgrid"><label class="field s2 s2m"><span class="n">Identifiant de connexion</span><input id="aIdentEd" value="'+esc(p.identifiant||"")+'" autocapitalize="none" autocomplete="username" placeholder="ex. dupont.j" /></label>'+
+    '<label class="field s2 s2m"><span class="n">Pseudo (affiché au groupe)</span><input id="aPseudoEd" value="'+esc(p.pseudo)+'" /></label>'+
     '<label class="field s2 s2m"><span class="n">Secteur (facultatif, visible du groupe)</span><input id="aCommune" value="'+esc(p.commune)+'" placeholder="Ex. Sud-Gironde" /></label></div>'+
     '<label class="tog" style="display:inline-flex"><input type="checkbox" id="aPartage"'+(p.partage?" checked":"")+' />Apparaître dans le classement du groupe</label>'+
     '<div class="btn-row"><button class="btn primary" id="aSaveProf">'+ico("i-save")+'Enregistrer le profil</button><button class="btn" id="aSync">'+ico("i-sync")+'Synchroniser</button><button class="btn ghost" id="aPwd">Changer le mot de passe</button><button class="btn ghost" id="aLogout">Se déconnecter</button></div>'+
     '<p class="hint">Votre carnet complet reste privé. Le groupe voit uniquement vos totaux par saison et vos espèces — jamais vos lieux, compagnons, armes ou notes.</p>';
   $("aSaveProf").onclick=async()=>{
     const upd={pseudo:$("aPseudoEd").value.trim(),commune:$("aCommune").value.trim(),partage:$("aPartage").checked};
+    const ident=normIdent($("aIdentEd").value);
     if(!upd.pseudo)return toast("Le pseudo ne peut pas être vide");
+    if(ident&&!IDENT_RE.test(ident))return toast("Identifiant : 3 à 30 caractères (lettres, chiffres, point, tiret)");
+    upd.identifiant=ident||null;
     const r=await SB.from("profils").update(upd).eq("id",USER.id);
     if(r.error)return toast(errFr(r.error));
     await loadProfil();renderAccount();toast("Profil enregistré");
@@ -1731,7 +1883,7 @@ function renderAccount(){
     if(!c)return;
     await SB.auth.signOut();
     if(c==="wipe"){DB=etatInitial();persist();applyTheme();}
-    rerender();toast("Déconnecté");
+    rerender();go("dash");showGate("login");
   };
 }
 async function newPasswordFlow(){
@@ -1745,7 +1897,7 @@ async function newPasswordFlow(){
 let GRP_SEASON=null,GRP_DATA=null,GRP_SEL=null;
 function grpGate(icon,title,text,btn){
   $("grpGate").innerHTML='<div class="panel gate">'+ico(icon)+'<h3>'+esc(title)+'</h3><p>'+esc(text)+'</p>'+(btn||"")+'</div>';
-  $("grpGate").classList.remove("hidden");$("grpBody").classList.add("hidden");$("adminPanel").classList.add("hidden");$("grpSeason").classList.add("hidden");$("grpRefresh").classList.add("hidden");
+  $("grpGate").classList.remove("hidden");$("grpBody").classList.add("hidden");$("adminPanel").classList.add("hidden");$("histPanel").classList.add("hidden");$("grpSeason").classList.add("hidden");$("grpRefresh").classList.add("hidden");
 }
 async function renderGroupe(){
   if(!CFG_OK)return grpGate("i-users","Partage pas encore activé","Le site fonctionne en mode local. L’administrateur doit configurer Supabase dans config.js (voir le guide README).");
@@ -1755,7 +1907,7 @@ async function renderGroupe(){
   if(!PROFIL||PROFIL.statut==="en_attente")return grpGate("i-clock","Compte en attente","L’administrateur doit valider votre compte. Votre carnet est déjà sauvegardé en ligne ; le classement apparaîtra ici dès la validation.");
   if(PROFIL.statut==="bloque")return grpGate("i-lock","Accès au groupe bloqué","Votre carnet personnel reste disponible. Contactez l’administrateur du groupe.");
   $("grpGate").classList.add("hidden");$("grpBody").classList.remove("hidden");$("grpSeason").classList.remove("hidden");$("grpRefresh").classList.remove("hidden");
-  if(PROFIL.role==="admin")renderAdmin();else $("adminPanel").classList.add("hidden");
+  if(PROFIL.role==="admin")renderAdmin();else{$("adminPanel").classList.add("hidden");$("histPanel").classList.add("hidden");}
   if(GRP_SEASON==null)GRP_SEASON=seasonOf(todayISO());
   $("grpMeta").textContent="Chargement…";
   try{
@@ -1816,6 +1968,7 @@ async function renderAdmin(){
   const btn=(act,id,label,kind)=>'<button class="btn sm '+(kind||"")+'" data-adm="'+act+'" data-id="'+esc(id)+'">'+label+'</button>';
   $("adminList").innerHTML=list.map(m=>{
     const me=m.id===USER.id,d=m.cree_le?fmtDateLong(String(m.cree_le).slice(0,10)):"";
+    const last=m.derniere_connexion?fmtDT(m.derniere_connexion):"jamais";
     const chips=(m.role==="admin"?'<span class="chip" style="color:var(--brass)">Admin</span> ':"")+({actif:'<span class="chip ok">Actif</span>',en_attente:'<span class="chip warn">En attente</span>',bloque:'<span class="chip bad">Bloqué</span>'}[m.statut]||"")+(m.partage?"":' <span class="chip">Masqué du classement</span>');
     let acts="";
     if(!me){
@@ -1823,12 +1976,32 @@ async function renderAdmin(){
       else if(m.statut==="actif")acts=(m.role==="admin"?btn("retirer",m.id,"Retirer admin"):btn("promouvoir",m.id,"Nommer admin","gold"))+btn("bloquer",m.id,"Bloquer","danger");
       else acts=btn("valider",m.id,"Réactiver");
     }else acts='<span class="chip">C’est vous</span>';
-    return'<div class="adm-row"><div class="who"><div class="avatar">'+esc(initials(m.pseudo))+'</div><div style="min-width:0"><div class="nm">'+esc(m.pseudo||"—")+'</div><small>'+esc(m.email||"")+(d?" · inscrit le "+d:"")+'</small><div style="margin-top:5px">'+chips+'</div></div></div><div class="acts">'+acts+'</div></div>';
+    acts+=btn("ident",m.id,"Identifiant")+'<button class="btn sm ghost" data-adm="mdp" data-id="'+esc(m.id)+'" data-email="'+esc(m.email||"")+'">Lien mot de passe</button>';
+    return'<div class="adm-row"><div class="who" style="align-items:flex-start"><div class="avatar">'+esc(initials(m.pseudo))+'</div><div style="min-width:0"><div class="nm">'+esc(m.pseudo||"—")+(m.identifiant?' <span class="chip" style="padding:1px 8px">'+esc(m.identifiant)+'</span>':' <span class="chip warn" style="padding:1px 8px">sans identifiant</span>')+'</div><small>'+esc(m.email||"")+(d?" · inscrit le "+d:"")+'</small>'+
+      '<div class="adm-meta"><span>ID <code title="'+esc(m.id)+'">'+esc(String(m.id).slice(0,8))+'</code></span><span>Dernière connexion : '+esc(last)+'</span><span>'+Number(m.nb_connexions||0)+' connexion(s) · '+Number(m.nb_echecs||0)+' échec(s)</span></div>'+
+      '<div style="margin-top:6px">'+chips+'</div></div></div><div class="acts">'+acts+'</div></div>';
   }).join("")||'<div class="empty">Aucun compte.</div>';
+  ADM_LIST=list;renderHist();
 }
 $("adminList").addEventListener("click",async e=>{
   const b=e.target.closest("[data-adm]");if(!b)return;
   const act=b.dataset.adm,id=b.dataset.id;
+  if(act==="mdp"){
+    const email=b.dataset.email;if(!email)return toast("Pas d’e-mail pour ce compte");
+    if(!(await confirmBox("Envoyer un lien ?","Un e-mail sera envoyé à "+email+" pour choisir un nouveau mot de passe.","Envoyer")))return;
+    const r=await SB.auth.resetPasswordForEmail(email,{redirectTo:BASE_URL});
+    return toast(r.error?errFr(r.error):"Lien envoyé à "+email);
+  }
+  if(act==="ident"){
+    const m=(ADM_LIST||[]).find(x=>x.id===id);
+    const v=await askInput("Identifiant de "+(m?m.pseudo:"ce membre"),"3 à 30 caractères : lettres minuscules, chiffres, point, tiret (ex. dupont.j). Laisser vide pour retirer.","text");
+    if(v==null)return;
+    const ident=normIdent(v);
+    if(ident&&!IDENT_RE.test(ident))return toast("Identifiant invalide");
+    const r=await SB.from("profils").update({identifiant:ident||null}).eq("id",id);
+    if(r.error)return toast(errFr(r.error));
+    toast("Identifiant enregistré");return renderGroupe();
+  }
   const upd={valider:{statut:"actif"},bloquer:{statut:"bloque"},promouvoir:{role:"admin"},retirer:{role:"membre"}}[act];
   if(act==="promouvoir"&&!(await confirmBox("Nommer administrateur ?","Ce membre pourra valider, bloquer et nommer d’autres membres.","Nommer admin")))return;
   if(act==="bloquer"&&!(await confirmBox("Bloquer ce compte ?","Il ne verra plus le groupe et disparaîtra du classement. Son carnet personnel n’est pas supprimé.","Bloquer")))return;
@@ -1838,6 +2011,41 @@ $("adminList").addEventListener("click",async e=>{
   toast({valider:"Membre validé",bloquer:"Compte bloqué",promouvoir:"Nouvel administrateur",retirer:"Droits admin retirés"}[act]);
   renderGroupe();
 });
+
+/* ---------- Historique des connexions (admin) ---------- */
+let ADM_LIST=null,HIST=null;
+function fmtDT(v){const d=new Date(v);return isNaN(d)?"—":d.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+function appareil(ua){
+  ua=String(ua||"");if(!ua)return"—";
+  const os=/Android/i.test(ua)?"Android":/iPhone/i.test(ua)?"iPhone":/iPad/i.test(ua)?"iPad":/Windows/i.test(ua)?"Windows":/Mac OS X|Macintosh/i.test(ua)?"Mac":/Linux/i.test(ua)?"Linux":"Autre";
+  const br=/Edg\//.test(ua)?"Edge":/SamsungBrowser/.test(ua)?"Samsung Internet":/Firefox|FxiOS/.test(ua)?"Firefox":/Chrome|CriOS/.test(ua)?"Chrome":/Safari/.test(ua)?"Safari":"";
+  return os+(br?" · "+br:"");
+}
+async function renderHist(){
+  $("histPanel").classList.remove("hidden");
+  const sel=$("histFilter"),cur=sel.value||"tous";
+  sel.innerHTML='<option value="tous">Toutes les connexions</option><option value="echec">Échecs uniquement</option>'+
+    (ADM_LIST||[]).filter(m=>m.identifiant).map(m=>'<option value="u:'+esc(m.identifiant)+'">'+esc(m.pseudo)+' ('+esc(m.identifiant)+')</option>').join("");
+  sel.value=Array.from(sel.options).some(o=>o.value===cur)?cur:"tous";
+  $("histMeta").textContent="Chargement…";
+  const r=await SB.rpc("admin_connexions",{p_limite:500});
+  if(r.error){$("histBody").innerHTML='<tr><td colspan="5" class="hint">'+esc(errFr(r.error))+'</td></tr>';$("histMeta").textContent="";return;}
+  HIST=r.data||[];drawHist();
+}
+function drawHist(){
+  const f=$("histFilter").value;
+  const rows=(HIST||[]).filter(h=>f==="tous"||(f==="echec"&&h.type==="echec")||(f.startsWith("u:")&&h.identifiant===f.slice(2)));
+  $("histBody").innerHTML=rows.length?rows.map(h=>{
+    const ok=h.type==="connexion";
+    return'<tr><td>'+esc(fmtDT(h.quand))+'</td><td>'+esc(h.pseudo||"—")+(h.identifiant?'<small>'+esc(h.identifiant)+'</small>':"")+'</td>'+
+      '<td><span class="chip '+(ok?"ok":"bad")+'" style="padding:1px 8px">'+(ok?"Réussie":"Échec")+'</span></td>'+
+      '<td title="'+esc(h.appareil||"")+'">'+esc(appareil(h.appareil))+'</td><td>'+esc(h.ip||"—")+'</td></tr>';
+  }).join(""):'<tr><td colspan="5" class="empty">Aucune connexion enregistrée.</td></tr>';
+  const nOk=rows.filter(h=>h.type==="connexion").length;
+  $("histMeta").textContent=rows.length+" ligne(s) · "+nOk+" réussie(s) · "+(rows.length-nOk)+" échec(s). Les connexions sont enregistrées à partir de la mise en place de l’historique ; les échecs n’ont pas d’adresse IP.";
+}
+$("histFilter").onchange=drawHist;
+$("histRefresh").onclick=()=>renderHist();
 
 /* ================== Démarrage ================== */
 applyTheme();prepareForm();renderDash();initCloud();renderAccount();
