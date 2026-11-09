@@ -368,6 +368,31 @@ body.gated .app,body.gated nav.bottom{visibility:hidden}
 .hist-table td small{display:block;color:var(--dim);font-size:.74rem}
 .adm-meta{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--dim);font-size:.76rem;margin-top:3px}
 .adm-meta code{font-size:.74rem;color:var(--muted)}
+
+/* ---------- Carnet d'un membre (lecture seule) ---------- */
+body.mv-open{overflow:hidden}
+.member-view{position:fixed;inset:0;z-index:50;overflow-y:auto;background:var(--bg);padding:0 16px calc(32px + env(safe-area-inset-bottom))}
+.mv-top{position:sticky;top:0;z-index:2;margin:0 -16px;padding:12px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.mv-top-in{max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.mv-top h2{margin:0;font-family:var(--f-head);font-size:1.15rem}
+.mv-top p{margin:2px 0 0;color:var(--muted);font-size:.8rem}
+.mv-wrap{max-width:1140px;margin:0 auto}
+.mv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+.mv-bar .meta{color:var(--dim);font-size:.8rem}
+.cols{display:flex;align-items:stretch;gap:2px;height:190px;padding-top:6px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;cursor:default}
+.col .cv{font-family:var(--f-num);font-size:.82rem;color:var(--muted);height:18px}
+.col .cb{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--line)}
+.col .cb i{display:block;width:min(70%,30px);background:var(--accent);border-radius:4px 4px 0 0}
+.col:hover .cb i{filter:brightness(1.15)}
+.col .cl{font-size:.7rem;color:var(--dim);margin-top:5px;white-space:nowrap}
+.mv-card{display:block;padding:0}
+.mv-card summary{list-style:none;display:grid;grid-template-columns:62px minmax(0,1fr);gap:14px;align-items:center;padding:12px;cursor:pointer}
+.mv-card summary::-webkit-details-marker{display:none}
+.mv-card[open]{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.mv-detail{padding:0 14px 12px;border-top:1px solid var(--line);margin-top:2px}
+.mv-notes{margin:10px 0 0;color:var(--muted);white-space:pre-line;font-size:.9rem}
+@media (max-width:560px){.mv-card summary{grid-template-columns:54px minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -405,6 +430,7 @@ body.gated .app,body.gated nav.bottom{visibility:hidden}
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
   <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
   <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4.3L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.7 4.3L21 15"/><path d="M21 20v-5h-5"/></symbol>
   <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 21h8M9 17h6"/></symbol>
@@ -631,7 +657,7 @@ body.gated .app,body.gated nav.bottom{visibility:hidden}
               <tbody id="grpRank"></tbody>
             </table>
           </div>
-          <div class="hint">Touchez un chasseur pour voir le détail de ses espèces.</div>
+          <div class="hint">Touchez un chasseur pour ouvrir son carnet complet (statistiques, graphiques, sorties) en lecture seule.</div>
           <div id="grpDetail"></div>
         </div>
         <div class="panel">
@@ -746,6 +772,15 @@ body.gated .app,body.gated nav.bottom{visibility:hidden}
   <button data-view="groupe"><span class="pill"><svg class="i"><use href="#i-users"/></svg></span>Groupe</button>
   <button data-view="regl"><span class="pill"><svg class="i"><use href="#i-set"/></svg></span>Réglages</button>
 </nav>
+
+<div class="member-view hidden" id="memberView" role="dialog" aria-modal="true" aria-labelledby="mvName">
+  <div class="mv-top"><div class="mv-top-in">
+    <button class="icon-btn" id="mvClose" title="Retour au groupe" aria-label="Retour au groupe"><svg class="i"><use href="#i-back"/></svg></button>
+    <div class="avatar" id="mvAvatar">?</div>
+    <div style="min-width:0;flex:1"><h2 id="mvName">Membre</h2><p id="mvSub"></p></div>
+  </div></div>
+  <div class="mv-wrap" id="mvBody"></div>
+</div>
 
 <div class="gate-screen hidden" id="loginGate" role="dialog" aria-modal="true" aria-label="Connexion">
   <div class="gate-card">
@@ -1862,9 +1897,9 @@ function renderAccount(){
     '<div class="fgrid"><label class="field s2 s2m"><span class="n">Identifiant de connexion</span><input id="aIdentEd" value="'+esc(p.identifiant||"")+'" autocapitalize="none" autocomplete="username" placeholder="ex. dupont.j" /></label>'+
     '<label class="field s2 s2m"><span class="n">Pseudo (affiché au groupe)</span><input id="aPseudoEd" value="'+esc(p.pseudo)+'" /></label>'+
     '<label class="field s2 s2m"><span class="n">Secteur (facultatif, visible du groupe)</span><input id="aCommune" value="'+esc(p.commune)+'" placeholder="Ex. Sud-Gironde" /></label></div>'+
-    '<label class="tog" style="display:inline-flex"><input type="checkbox" id="aPartage"'+(p.partage?" checked":"")+' />Apparaître dans le classement du groupe</label>'+
+    '<label class="tog" style="display:inline-flex"><input type="checkbox" id="aPartage"'+(p.partage?" checked":"")+' />Partager mon carnet et mes stats avec le groupe</label>'+
     '<div class="btn-row"><button class="btn primary" id="aSaveProf">'+ico("i-save")+'Enregistrer le profil</button><button class="btn" id="aSync">'+ico("i-sync")+'Synchroniser</button><button class="btn ghost" id="aPwd">Changer le mot de passe</button><button class="btn ghost" id="aLogout">Se déconnecter</button></div>'+
-    '<p class="hint">Votre carnet complet reste privé. Le groupe voit uniquement vos totaux par saison et vos espèces — jamais vos lieux, compagnons, armes ou notes.</p>';
+    '<p class="hint">Si le partage est coché, les membres validés du groupe peuvent consulter votre carnet complet (sorties, lieux, notes) en lecture seule. Personne d’autre que vous ne peut le modifier. L’administrateur peut toujours le consulter.</p>';
   $("aSaveProf").onclick=async()=>{
     const upd={pseudo:$("aPseudoEd").value.trim(),commune:$("aCommune").value.trim(),partage:$("aPartage").checked};
     const ident=normIdent($("aIdentEd").value);
@@ -1952,7 +1987,7 @@ function drawGroupeDetail(){
       .map(x=>'<div class="kv"><span>'+x[0]+'</span><strong>'+esc(x[1])+'</strong></div>').join("")+
     (esp.length?'<div class="s-chips" style="margin-top:10px">'+esp.map(e=>'<span class="chip '+(e.tuee?"tuee":"vue")+'">'+esc(e.nom)+' · '+(e.tuee?e.tuee+" tuée(s)":e.vue+" vue(s)")+'</span>').join("")+'</div>':"")+'</div>';
 }
-$("grpRank").addEventListener("click",e=>{const tr=e.target.closest("tr[data-uid]");if(!tr)return;GRP_SEL=GRP_SEL===tr.dataset.uid?null:tr.dataset.uid;drawGroupeDetail();});
+$("grpRank").addEventListener("click",e=>{const tr=e.target.closest("tr[data-uid]");if(!tr)return;openMember(tr.dataset.uid);});
 $("grpSeason").onchange=e=>{GRP_SEASON=Number(e.target.value);GRP_SEL=null;renderGroupe();};
 $("grpRefresh").onclick=()=>renderGroupe();
 
@@ -1976,6 +2011,7 @@ async function renderAdmin(){
       else if(m.statut==="actif")acts=(m.role==="admin"?btn("retirer",m.id,"Retirer admin"):btn("promouvoir",m.id,"Nommer admin","gold"))+btn("bloquer",m.id,"Bloquer","danger");
       else acts=btn("valider",m.id,"Réactiver");
     }else acts='<span class="chip">C’est vous</span>';
+    if(!me)acts=btn("voir",m.id,"Voir le carnet")+acts;
     acts+=btn("ident",m.id,"Identifiant")+'<button class="btn sm ghost" data-adm="mdp" data-id="'+esc(m.id)+'" data-email="'+esc(m.email||"")+'">Lien mot de passe</button>';
     return'<div class="adm-row"><div class="who" style="align-items:flex-start"><div class="avatar">'+esc(initials(m.pseudo))+'</div><div style="min-width:0"><div class="nm">'+esc(m.pseudo||"—")+(m.identifiant?' <span class="chip" style="padding:1px 8px">'+esc(m.identifiant)+'</span>':' <span class="chip warn" style="padding:1px 8px">sans identifiant</span>')+'</div><small>'+esc(m.email||"")+(d?" · inscrit le "+d:"")+'</small>'+
       '<div class="adm-meta"><span>ID <code title="'+esc(m.id)+'">'+esc(String(m.id).slice(0,8))+'</code></span><span>Dernière connexion : '+esc(last)+'</span><span>'+Number(m.nb_connexions||0)+' connexion(s) · '+Number(m.nb_echecs||0)+' échec(s)</span></div>'+
@@ -1986,6 +2022,7 @@ async function renderAdmin(){
 $("adminList").addEventListener("click",async e=>{
   const b=e.target.closest("[data-adm]");if(!b)return;
   const act=b.dataset.adm,id=b.dataset.id;
+  if(act==="voir")return openMember(id);
   if(act==="mdp"){
     const email=b.dataset.email;if(!email)return toast("Pas d’e-mail pour ce compte");
     if(!(await confirmBox("Envoyer un lien ?","Un e-mail sera envoyé à "+email+" pour choisir un nouveau mot de passe.","Envoyer")))return;
@@ -2046,6 +2083,89 @@ function drawHist(){
 }
 $("histFilter").onchange=drawHist;
 $("histRefresh").onclick=()=>renderHist();
+
+/* ---------- Carnet d'un membre (lecture seule) ---------- */
+let MV=null; // {p, data, season}
+async function openMember(uid){
+  const prof=(GRP_DATA||[]).map(r=>r.p).concat(ADM_LIST||[]).find(x=>x.id===uid)||{id:uid,pseudo:"Membre"};
+  if(uid===USER.id){go("dash");return;}
+  $("memberView").classList.remove("hidden");document.body.classList.add("mv-open");
+  $("mvName").textContent=prof.pseudo||"Membre";
+  $("mvSub").textContent=(prof.identifiant?prof.identifiant+" · ":"")+(prof.commune||"Carnet en lecture seule");
+  $("mvAvatar").textContent=initials(prof.pseudo);
+  $("mvBody").innerHTML='<div class="empty">Chargement du carnet…</div>';
+  $("memberView").scrollTop=0;
+  const r=await SB.from("carnets").select("data,maj_le").eq("user_id",uid).maybeSingle();
+  if(r.error){$("mvBody").innerHTML='<div class="empty">'+esc(errFr(r.error))+'</div>';return;}
+  if(!r.data){$("mvBody").innerHTML='<div class="empty">'+ico("i-hist")+'Ce chasseur n’a pas encore de carnet en ligne, ou il ne le partage pas.</div>';return;}
+  const d=r.data.data||{};
+  const sessions=(Array.isArray(d.sessions)?d.sessions:[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const seasons=Array.from(new Set(sessions.map(s=>seasonOf(s.date)).filter(Boolean))).sort((a,b)=>b-a);
+  MV={p:prof,sessions:sessions,passages:d.passages||{},settings:d.settings||{},maj:r.data.maj_le,seasons:seasons,season:seasons.includes(GRP_SEASON)?GRP_SEASON:(seasons[0]||"all")};
+  drawMember();
+}
+function closeMember(){$("memberView").classList.add("hidden");document.body.classList.remove("mv-open");MV=null;}
+function mvStats(list,season){
+  const sum=k=>list.reduce((a,s)=>a+Number(s[k]||0),0);
+  const byDay={};list.forEach(s=>{byDay[s.date]=Math.max(byDay[s.date]||0,Number(s.vols||0));});
+  Object.keys(MV.passages).forEach(dt=>{if(season==="all"||seasonOf(dt)===season)byDay[dt]=Math.max(byDay[dt]||0,Number((MV.passages[dt]||{}).nombre||0));});
+  const o={sorties:list.length,tues:sumStatut(list,"tuee"),vues:sumStatut(list,"vue"),bless:sumStatut(list,"blessee"),perd:sumStatut(list,"perdue"),
+    cart:sum("cartouches"),km:sum("km"),duree:sum("duree"),vols:Object.values(byDay).reduce((a,b)=>a+b,0)};
+  o.ratio=o.tues?(o.cart/o.tues).toFixed(1).replace(".",","):"—";
+  return o;
+}
+function drawMember(){
+  const m=MV,season=m.season;
+  const list=m.sessions.filter(s=>season==="all"||seasonOf(s.date)===season);
+  const st=mvStats(list,season);
+  const opts='<option value="all"'+(season==="all"?" selected":"")+'>Toutes les saisons</option>'+m.seasons.map(y=>'<option value="'+y+'"'+(y===season?" selected":"")+'>'+seasonLabel(y)+'</option>').join("");
+  const tile=(lbl,icon,val,sub)=>'<article class="stat"><div class="top"><span class="lbl">'+lbl+'</span><span class="ic">'+ico(icon)+'</span></div><div class="val">'+esc(val)+'</div><div class="sub">'+esc(sub)+'</div></article>';
+  // Pièces par mois (ordre de la saison)
+  const start=Number(String(seasonMD()).slice(0,2))||9;
+  const months=[];for(let i=0;i<12;i++)months.push(((start-1+i)%12));
+  const perM=months.map(mi=>({mi:mi,n:list.filter(s=>Number(String(s.date).slice(5,7))-1===mi).reduce((a,s)=>a+countStatut(s,"tuee"),0),
+    sorties:list.filter(s=>Number(String(s.date).slice(5,7))-1===mi).length}));
+  let lastActive=-1;perM.forEach((x,i)=>{if(x.n||x.sorties)lastActive=i;});
+  const shown=perM.slice(0,Math.max(6,lastActive+1));
+  const maxM=Math.max(1,...shown.map(x=>x.n));
+  const colChart=shown.some(x=>x.n||x.sorties)?'<div class="cols" role="img" aria-label="Pièces prélevées par mois">'+shown.map(x=>
+    '<div class="col" title="'+esc(MOIS[x.mi]+" : "+x.n+" pièce(s), "+x.sorties+" sortie(s)")+'"><span class="cv">'+(x.n||"")+'</span><span class="cb"><i style="height:'+(x.n?Math.max(4,x.n/maxM*100):0)+'%"></i></span><span class="cl">'+MOIS[x.mi].replace(".","")+'</span></div>').join("")+'</div>'
+    :'<div class="empty">'+ico("i-chart")+'Aucune sortie sur cette période.</div>';
+  const rk=ranking(list).filter(e=>e.tuee>0);
+  const maxS=Math.max(1,...rk.map(e=>e.tuee));
+  const spChart=rk.length?rk.slice(0,10).map(e=>'<div class="chart-row" title="'+esc(e.nom+" : "+e.tuee+" tuée(s), "+e.vue+" vue(s)")+'"><div class="chart-label">'+esc(e.nom)+'</div><div class="chart-track"><span style="width:'+(e.tuee/maxS*100)+'%"></span></div><div class="chart-val">'+e.tuee+'</div></div>').join("")
+    :'<div class="empty">'+ico("i-target")+'Pas encore de pièces.</div>';
+  const armes={};list.forEach(s=>{if(s.arme){armes[s.arme]=(armes[s.arme]||0)+1;}});
+  const armesTxt=Object.entries(armes).sort((a,b)=>b[1]-a[1]).map(a=>esc(a[0])+" ("+a[1]+")").join(", ");
+  const cards=list.length?list.map(mvCard).join(""):'<div class="empty">Aucune sortie sur cette période.</div>';
+  $("mvBody").innerHTML=
+    '<div class="mv-bar"><select id="mvSeason" style="width:auto">'+opts+'</select><span class="chip">'+ico("i-lock","width:14px;height:14px")+'Lecture seule</span>'+
+      (m.maj?'<span class="meta">Mis à jour le '+esc(fmtDT(m.maj))+'</span>':"")+'</div>'+
+    '<div class="grid">'+tile("Pièces","i-target",st.tues,st.vues+" vues · "+st.bless+" blessées · "+st.perd+" perdues")+tile("Sorties","i-cal",st.sorties,fmtDuree(st.duree)+" de chasse")+
+      tile("Cartouches / pièce","i-ratio",st.ratio,st.cart+" cartouches")+tile("Kilomètres","i-route",fmtNum(st.km),st.vols+" vols vus")+'</div>'+
+    '<div class="split">'+
+      '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-chart")+'</span>Pièces par mois</h3></div>'+colChart+'</div>'+
+      '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Espèces prélevées</h3><span class="meta">'+rk.length+' espèce(s)</span></div>'+spChart+
+        (armesTxt?'<div class="hint">Armes utilisées : '+armesTxt+'</div>':"")+'</div>'+
+    '</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-hist")+'</span>Sorties</h3><span class="meta">'+list.length+' sortie(s)</span></div><div class="mv-list">'+cards+'</div></div>';
+  $("mvSeason").onchange=e=>{MV.season=e.target.value==="all"?"all":Number(e.target.value);drawMember();};
+}
+function mvCard(s){
+  const [y,mo,d]=(s.date||"----").split("-");
+  const chips=["tuee","vue","blessee","perdue"].map(k=>{const n=countStatut(s,k);return n?'<span class="chip '+k+'">'+n+" "+STAT_LBL[k].toLowerCase()+(n>1?"s":"")+'</span>':"";}).join("");
+  const esp=(s.especes||[]).filter(e=>Number(e.nombre)>0).map(e=>esc(e.nom)+" ×"+Number(e.nombre)+" ("+(STAT_LBL[e.statut]||e.statut).toLowerCase()+")").join(" · ");
+  return'<details class="s-card mv-card"><summary><div class="dateblk"><span class="d">'+Number(d||0)+'</span><span class="m">'+(MOIS[Number(mo)-1]||"")+'</span><span class="y">'+(y||"")+'</span></div>'+
+    '<div style="min-width:0"><div class="s-title">'+esc(s.lieu||"Lieu non précisé")+'</div><div class="s-meta">'+
+    (s.avec?'<span>'+ico("i-users")+esc(s.avec)+'</span>':"")+'<span>'+ico("i-shell")+(s.cartouches||0)+' cart.</span>'+(s.km?'<span>'+ico("i-route")+fmtNum(s.km)+' km</span>':"")+
+    (s.duree?'<span>'+ico("i-clock")+fmtDuree(s.duree)+'</span>':"")+(s.vols?'<span>'+ico("i-bird")+s.vols+' vols</span>':"")+'</div>'+
+    '<div class="s-chips">'+(chips||'<span class="chip">Aucune observation</span>')+'</div></div></summary>'+
+    '<div class="mv-detail">'+(s.arme?'<div class="kv"><span>Arme</span><strong>'+esc(s.arme)+'</strong></div>':"")+
+      (esp?'<div class="kv"><span>Détail</span><strong style="text-align:right">'+esp+'</strong></div>':"")+
+      (s.notes?'<p class="mv-notes">'+esc(s.notes)+'</p>':"")+'</div></details>';
+}
+$("mvClose").onclick=closeMember;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&MV)closeMember();});
 
 /* ================== Démarrage ================== */
 applyTheme();prepareForm();renderDash();initCloud();renderAccount();
