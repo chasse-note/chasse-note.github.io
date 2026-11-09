@@ -2012,7 +2012,7 @@ async function renderAdmin(){
       else acts=btn("valider",m.id,"Réactiver");
     }else acts='<span class="chip">C’est vous</span>';
     if(!me)acts=btn("voir",m.id,"Voir le carnet")+acts;
-    acts+=btn("ident",m.id,"Identifiant")+'<button class="btn sm ghost" data-adm="mdp" data-id="'+esc(m.id)+'" data-email="'+esc(m.email||"")+'">Lien mot de passe</button>';
+    acts+=btn("ident",m.id,"Identifiant")+'<button class="btn sm" data-adm="email" data-id="'+esc(m.id)+'" data-email="'+esc(m.email||"")+'">E-mail</button>'+'<button class="btn sm ghost" data-adm="mdp" data-id="'+esc(m.id)+'" data-email="'+esc(m.email||"")+'">Lien mot de passe</button>';
     return'<div class="adm-row"><div class="who" style="align-items:flex-start"><div class="avatar">'+esc(initials(m.pseudo))+'</div><div style="min-width:0"><div class="nm">'+esc(m.pseudo||"—")+(m.identifiant?' <span class="chip" style="padding:1px 8px">'+esc(m.identifiant)+'</span>':' <span class="chip warn" style="padding:1px 8px">sans identifiant</span>')+'</div><small>'+esc(m.email||"")+(d?" · inscrit le "+d:"")+'</small>'+
       '<div class="adm-meta"><span>ID <code title="'+esc(m.id)+'">'+esc(String(m.id).slice(0,8))+'</code></span><span>Dernière connexion : '+esc(last)+'</span><span>'+Number(m.nb_connexions||0)+' connexion(s) · '+Number(m.nb_echecs||0)+' échec(s)</span></div>'+
       '<div style="margin-top:6px">'+chips+'</div></div></div><div class="acts">'+acts+'</div></div>';
@@ -2023,6 +2023,18 @@ $("adminList").addEventListener("click",async e=>{
   const b=e.target.closest("[data-adm]");if(!b)return;
   const act=b.dataset.adm,id=b.dataset.id;
   if(act==="voir")return openMember(id);
+  if(act==="email"){
+    const m=(ADM_LIST||[]).find(x=>x.id===id);
+    const v=await askInput("E-mail de "+(m?m.pseudo:"ce membre"),"Adresse actuelle : "+(b.dataset.email||"aucune")+"\nNouvelle adresse (servira pour la connexion par e-mail et le mot de passe oublié) :","email");
+    if(v==null)return;
+    const e=v.trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))return toast("Adresse e-mail invalide");
+    if(e===(b.dataset.email||"").toLowerCase())return;
+    if(!(await confirmBox("Changer l’e-mail ?",(m?m.pseudo:"Ce membre")+" : "+(b.dataset.email||"—")+" → "+e+"\nSon identifiant et son mot de passe ne changent pas.","Changer")))return;
+    const r=await SB.rpc("admin_changer_email",{p_user:id,p_email:e});
+    if(r.error)return toast(errFr(r.error));
+    toast("E-mail modifié : "+r.data);return renderGroupe();
+  }
   if(act==="mdp"){
     const email=b.dataset.email;if(!email)return toast("Pas d’e-mail pour ce compte");
     if(!(await confirmBox("Envoyer un lien ?","Un e-mail sera envoyé à "+email+" pour choisir un nouveau mot de passe.","Envoyer")))return;
