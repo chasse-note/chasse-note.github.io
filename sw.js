@@ -1,6 +1,6 @@
 // Chasse Note — fonctionnement hors ligne (à la chasse, sans réseau).
 // Changez VERSION à chaque mise à jour du site pour forcer le rafraîchissement.
-const VERSION = "chasse-note-v5";
+const VERSION = "chasse-note-v6";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 const CDN = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com"];
 
@@ -38,4 +38,13 @@ self.addEventListener("fetch", e => {
       })
     );
   }
+});
+
+// Toucher une alerte « nouvelle sortie » ouvre (ou ramène) le site.
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ("focus" in c) return c.focus(); }
+    return self.clients.openWindow("./");
+  }));
 });

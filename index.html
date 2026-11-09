@@ -393,6 +393,24 @@ body.mv-open{overflow:hidden}
 .mv-detail{padding:0 14px 12px;border-top:1px solid var(--line);margin-top:2px}
 .mv-notes{margin:10px 0 0;color:var(--muted);white-space:pre-line;font-size:.9rem}
 @media (max-width:560px){.mv-card summary{grid-template-columns:54px minmax(0,1fr)}}
+
+/* ---------- Fil du groupe ---------- */
+.feed{display:flex;flex-direction:column;gap:8px}
+.post{display:flex;gap:12px;align-items:flex-start;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:border-color .15s}
+.post:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.post-h{font-size:.9rem;color:var(--muted)}
+.post-h strong{color:var(--text)}
+.post-h span{color:var(--dim);font-size:.78rem;margin-left:8px}
+.post-t{font-weight:600;margin:3px 0 6px}
+.post-pop{position:fixed;z-index:65;top:calc(12px + env(safe-area-inset-top));left:50%;width:min(440px,calc(100% - 24px));
+  transform:translate(-50%,-140%);transition:transform .25s ease;display:flex;gap:12px;align-items:flex-start;
+  background:var(--panel);border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));border-radius:16px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.post-pop.in{transform:translate(-50%,0)}
+.pp-h{font-weight:600}
+.pp-t{color:var(--muted);font-size:.9rem;margin-top:2px}
+.pp-a{display:flex;gap:8px;margin-top:10px}
+.nbadge{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--danger);color:#fff;font-size:.7rem;font-weight:700;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--panel)}
+[data-view="groupe"],[data-view="groupe"] .pill{position:relative}
 </style>
 </head>
 <body>
@@ -647,6 +665,11 @@ body.mv-open{overflow:hidden}
     </div>
     <div id="grpGate"></div>
     <div id="grpBody" class="hidden">
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-bird"/></svg></span>Fil du groupe</h3><span class="meta" id="grpFeedMeta"></span></div>
+        <div class="feed" id="grpFeed"></div>
+        <div class="hint">Chaque nouvelle sortie enregistrée par un membre est publiée ici, avec une alerte pour les autres. Touchez une publication pour ouvrir le carnet.</div>
+      </div>
       <div class="grid" id="grpTotals"></div>
       <div class="split">
         <div class="panel">
@@ -781,6 +804,8 @@ body.mv-open{overflow:hidden}
   </div></div>
   <div class="mv-wrap" id="mvBody"></div>
 </div>
+
+<div class="post-pop hidden" id="postPop" role="status" aria-live="polite"></div>
 
 <div class="gate-screen hidden" id="loginGate" role="dialog" aria-modal="true" aria-label="Connexion">
   <div class="gate-card">
@@ -1132,7 +1157,7 @@ $("btnSaveSession").onclick=()=>{
   const s={id:$("editId").value||uid(),date:date,debut:debut,fin:fin,duree:duree,lieu:$("sLieu").value.trim(),km:Number($("sKm").value||0),avec:$("sAvec").value.trim(),
     arme:$("sArme").value,cartouches:Number($("sCart").value||0),espaces:Number($("sEspaces").value||0),notes:$("sNotes").value.trim(),vols:Number($("sVols").value||0),especes:collectSpecies()};
   const idx=DB.sessions.findIndex(x=>x.id===s.id);
-  if(idx>=0)DB.sessions[idx]=s;else DB.sessions.push(s);
+  if(idx>=0)DB.sessions[idx]=s;else{DB.sessions.push(s);if(typeof queuePub==="function")queuePub(s.id);}
   DB.sessions.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(s.vols>0){const prev=DB.passages[date]||{nombre:0,note:""};DB.passages[date]={nombre:Math.max(Number(prev.nombre||0),s.vols),note:prev.note||""};}
   save();$("editId").value=s.id;$("formTitle").textContent="Modifier la session";
@@ -1642,7 +1667,7 @@ function initCloud(){
     if(u)hideGate();else if(ev!=="PASSWORD_RECOVERY")showGate("login");
     if(!changed)return;
     if(u)setTimeout(afterLogin,0);
-    else{PROFIL=null;setSync("out");renderAccount();if(currentView()==="groupe")renderGroupe();}
+    else{PROFIL=null;stopFeed();setSync("out");renderAccount();if(currentView()==="groupe")renderGroupe();}
   });
   window.addEventListener("online",()=>{if(USER&&DB.meta.dirty)pushNow();else if(USER)pullIfNewer();});
   window.addEventListener("offline",()=>{if(USER)setSync("offline");});
@@ -1706,6 +1731,7 @@ async function afterLogin(){
     }
   }catch(e){setSync("error",errFr(e));}
   renderAccount();rerender();
+  startFeed().catch(()=>{});
 }
 
 /* ---------- Envoi / réception ---------- */
@@ -1727,6 +1753,7 @@ async function pushNow(){
     const r=await SB.from("carnets").upsert({user_id:USER.id,data:data,maj_le:iso});
     if(r.error)throw r.error;
     await publishStats();
+    await flushPubs();
     DB.meta.owner=USER.id;DB.meta.cloud=iso;
     if(DB.meta.maj===stamp)DB.meta.dirty=false;
     persist();setSync(DB.meta.dirty?"pending":"ok");
@@ -1899,6 +1926,7 @@ function renderAccount(){
     '<label class="field s2 s2m"><span class="n">Secteur (facultatif, visible du groupe)</span><input id="aCommune" value="'+esc(p.commune)+'" placeholder="Ex. Sud-Gironde" /></label></div>'+
     '<label class="tog" style="display:inline-flex"><input type="checkbox" id="aPartage"'+(p.partage?" checked":"")+' />Partager mon carnet et mes stats avec le groupe</label>'+
     '<div class="btn-row"><button class="btn primary" id="aSaveProf">'+ico("i-save")+'Enregistrer le profil</button><button class="btn" id="aSync">'+ico("i-sync")+'Synchroniser</button><button class="btn ghost" id="aPwd">Changer le mot de passe</button><button class="btn ghost" id="aLogout">Se déconnecter</button></div>'+
+    ('Notification' in window?'<div class="btn-row" style="margin-top:4px">'+(Notification.permission==="granted"?'<span class="chip ok">'+ico("i-bird","width:14px;height:14px")+'Alertes activées sur cet appareil</span>':'<button class="btn" id="aNotif">'+ico("i-bird")+'Activer les alertes sur cet appareil</button>')+'</div>':"")+
     '<p class="hint">Si le partage est coché, les membres validés du groupe peuvent consulter votre carnet complet (sorties, lieux, notes) en lecture seule. Personne d’autre que vous ne peut le modifier. L’administrateur peut toujours le consulter.</p>';
   $("aSaveProf").onclick=async()=>{
     const upd={pseudo:$("aPseudoEd").value.trim(),commune:$("aCommune").value.trim(),partage:$("aPartage").checked};
@@ -1912,6 +1940,7 @@ function renderAccount(){
   };
   $("aSync").onclick=async()=>{if(DB.meta.dirty)await pushNow();else{await pullIfNewer();await pushNow();}toast("Synchronisation terminée");};
   $("aPwd").onclick=newPasswordFlow;
+  if($("aNotif"))$("aNotif").onclick=askNotifPermission;
   $("aLogout").onclick=async()=>{
     if(DB.meta.dirty)await pushNow();
     const c=await ask("Se déconnecter","Votre carnet est sauvegardé sur votre compte.\nVoulez-vous aussi l’effacer de ce téléphone (appareil partagé) ?",[{label:"Annuler",value:null,kind:"ghost"},{label:"Effacer ce téléphone",value:"wipe",kind:"danger"},{label:"Garder",value:"keep",kind:"primary"}]);
@@ -1942,6 +1971,7 @@ async function renderGroupe(){
   if(!PROFIL||PROFIL.statut==="en_attente")return grpGate("i-clock","Compte en attente","L’administrateur doit valider votre compte. Votre carnet est déjà sauvegardé en ligne ; le classement apparaîtra ici dès la validation.");
   if(PROFIL.statut==="bloque")return grpGate("i-lock","Accès au groupe bloqué","Votre carnet personnel reste disponible. Contactez l’administrateur du groupe.");
   $("grpGate").classList.add("hidden");$("grpBody").classList.remove("hidden");$("grpSeason").classList.remove("hidden");$("grpRefresh").classList.remove("hidden");
+  renderFeed();if(FIL_UNREAD)markSeen();
   if(PROFIL.role==="admin")renderAdmin();else{$("adminPanel").classList.add("hidden");$("histPanel").classList.add("hidden");}
   if(GRP_SEASON==null)GRP_SEASON=seasonOf(todayISO());
   $("grpMeta").textContent="Chargement…";
@@ -2178,6 +2208,136 @@ function mvCard(s){
 }
 $("mvClose").onclick=closeMember;
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&MV)closeMember();});
+
+/* ---------- Fil du groupe : publications de sorties + pop-up ---------- */
+let FIL_CH=null,FIL_UNREAD=0,PROFS={};
+function pubResume(s){
+  const esp={};(s.especes||[]).forEach(e=>{const n=Number(e.nombre||0);if(!n)return;const k=e.nom+"|"+e.statut;esp[k]=(esp[k]||0)+n;});
+  return{date:s.date,lieu:s.lieu||"",avec:s.avec||"",pieces:countStatut(s,"tuee"),vues:countStatut(s,"vue"),cartouches:Number(s.cartouches||0),
+    duree:Number(s.duree||0),vols:Number(s.vols||0),
+    especes:Object.entries(esp).map(([k,n])=>({nom:k.split("|")[0],statut:k.split("|")[1],nombre:n})).slice(0,12)};
+}
+function queuePub(id){DB.meta=DB.meta||metaDefaut();DB.meta.pubQueue=(DB.meta.pubQueue||[]).filter(x=>x!==id).concat([id]);}
+async function flushPubs(){
+  const q=(DB.meta&&DB.meta.pubQueue)||[];if(!q.length||!SB||!USER)return;
+  for(const id of q.slice()){
+    const s=DB.sessions.find(x=>x.id===id);
+    if(s){
+      const r=await SB.from("publications").upsert({user_id:USER.id,session_id:id,date_sortie:s.date||null,resume:pubResume(s)},{onConflict:"user_id,session_id",ignoreDuplicates:true});
+      if(r.error)throw r.error;
+    }
+    DB.meta.pubQueue=(DB.meta.pubQueue||[]).filter(x=>x!==id);
+  }
+  persist();
+}
+async function loadProfs(){
+  const r=await SB.from("profils").select("id,pseudo,identifiant,commune");
+  if(!r.error)(r.data||[]).forEach(p=>{PROFS[p.id]=p;});
+}
+function ago(ts){
+  const d=(Date.now()-new Date(ts).getTime())/1000;
+  if(d<60)return"à l’instant";if(d<3600)return"il y a "+Math.floor(d/60)+" min";
+  if(d<86400)return"il y a "+Math.floor(d/3600)+" h";if(d<172800)return"hier";
+  return"le "+new Date(ts).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+}
+function pubLine(r){
+  const s=r||{},parts=[];
+  if(s.pieces)parts.push(s.pieces+" pièce"+(s.pieces>1?"s":""));
+  const top=(s.especes||[]).filter(e=>e.statut==="tuee").sort((a,b)=>b.nombre-a.nombre).slice(0,2).map(e=>e.nombre+" "+e.nom.toLowerCase());
+  if(top.length)parts[0]=top.join(", ");
+  if(!s.pieces&&s.vues)parts.push(s.vues+" vue"+(s.vues>1?"s":""));
+  if(s.lieu)parts.push(s.lieu);
+  if(s.date){const [y,m,d]=s.date.split("-");parts.push(Number(d)+" "+(MOIS[Number(m)-1]||""));}
+  return parts.join(" · ")||"Nouvelle sortie";
+}
+function pubCard(p){
+  const a=PROFS[p.user_id]||{pseudo:"Un membre"},s=p.resume||{};
+  const chips=(s.especes||[]).filter(e=>e.statut==="tuee"||e.statut==="vue").slice(0,4).map(e=>'<span class="chip '+e.statut+'">'+e.nombre+" "+esc(e.nom)+'</span>').join("");
+  return'<div class="post" data-uid="'+esc(p.user_id)+'"><div class="avatar">'+esc(initials(a.pseudo))+'</div><div style="min-width:0;flex:1">'+
+    '<div class="post-h"><strong>'+esc(a.pseudo)+'</strong> a publié une sortie<span>'+esc(ago(p.cree_le))+'</span></div>'+
+    '<div class="post-t">'+esc(s.lieu||"Lieu non précisé")+(s.date?' · '+esc(fmtDateLong(s.date)):"")+'</div>'+
+    '<div class="s-chips">'+(chips||'<span class="chip">Aucune observation</span>')+(s.cartouches?'<span class="chip" style="border-style:dashed">'+s.cartouches+' cart.</span>':"")+'</div></div></div>';
+}
+function setBadge(n){
+  FIL_UNREAD=Math.max(0,n);
+  document.querySelectorAll('[data-view="groupe"]').forEach(b=>{
+    let x=b.querySelector(".nbadge");
+    if(!FIL_UNREAD){if(x)x.remove();return;}
+    if(!x){x=document.createElement("span");x.className="nbadge";(b.querySelector(".pill")||b).appendChild(x);}
+    x.textContent=FIL_UNREAD>9?"9+":FIL_UNREAD;
+  });
+}
+async function markSeen(){
+  if(!SB||!USER)return;setBadge(0);
+  const now=new Date().toISOString();if(PROFIL)PROFIL.fil_vu_le=now;
+  await SB.from("profils").update({fil_vu_le:now}).eq("id",USER.id);
+}
+let POP_T=null;
+function showPostPop(p){
+  const a=PROFS[p.user_id]||{pseudo:"Un membre"};
+  const el=$("postPop");
+  el.innerHTML='<div class="avatar">'+esc(initials(a.pseudo))+'</div><div style="min-width:0;flex:1"><div class="pp-h">'+esc(a.pseudo)+' a publié une sortie</div><div class="pp-t">'+esc(pubLine(p.resume))+'</div>'+
+    '<div class="pp-a"><button class="btn sm primary" data-pp="voir">Voir</button><button class="btn sm ghost" data-pp="fermer">Fermer</button></div></div>';
+  el.classList.remove("hidden");requestAnimationFrame(()=>el.classList.add("in"));
+  el.querySelector('[data-pp="voir"]').onclick=()=>{hidePostPop();markSeen();openMember(p.user_id);};
+  el.querySelector('[data-pp="fermer"]').onclick=hidePostPop;
+  clearTimeout(POP_T);POP_T=setTimeout(hidePostPop,15000);
+}
+function hidePostPop(){const el=$("postPop");el.classList.remove("in");setTimeout(()=>el.classList.add("hidden"),250);}
+function systemNotif(p){
+  try{
+    if(!("Notification" in window)||Notification.permission!=="granted"||!document.hidden)return;
+    const a=PROFS[p.user_id]||{pseudo:"Un membre"},title=a.pseudo+" a publié une sortie",body=pubLine(p.resume);
+    const opt={body:body,icon:"icon-192.png",badge:"icon-192.png",tag:"pub-"+p.id};
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(title,opt)).catch(()=>{new Notification(title,opt);});
+    else new Notification(title,opt);
+  }catch(e){}
+}
+async function startFeed(){
+  if(!SB||!USER)return;
+  await loadProfs();
+  // Publications arrivées depuis la dernière visite
+  const since=(PROFIL&&PROFIL.fil_vu_le)||new Date().toISOString();
+  const r=await SB.from("publications").select("*").gt("cree_le",since).neq("user_id",USER.id).order("cree_le",{ascending:false}).limit(20);
+  const list=r.error?[]:(r.data||[]);
+  setBadge(list.length);
+  if(list.length===1)showPostPop(list[0]);
+  else if(list.length>1)showUnreadModal(list);
+  // Temps réel
+  if(FIL_CH)SB.removeChannel(FIL_CH);
+  FIL_CH=SB.channel("fil-groupe").on("postgres_changes",{event:"INSERT",schema:"public",table:"publications"},async payload=>{
+    const p=payload.new;if(!p||p.user_id===USER.id)return;
+    if(!PROFS[p.user_id])await loadProfs();
+    if(currentView()==="groupe"){renderFeed();markSeen();}else setBadge(FIL_UNREAD+1);
+    showPostPop(p);systemNotif(p);
+  }).subscribe();
+}
+function stopFeed(){if(FIL_CH&&SB)SB.removeChannel(FIL_CH);FIL_CH=null;setBadge(0);hidePostPop();}
+function showUnreadModal(list){
+  const m=document.createElement("div");m.className="modal";
+  m.innerHTML='<div class="box" role="dialog" aria-modal="true" style="max-width:480px"><h3>'+list.length+' nouvelles sorties dans le groupe</h3><div class="feed" style="max-height:55vh;overflow:auto;margin:10px 0">'+list.map(pubCard).join("")+'</div>'+
+    '<div class="btn-row"><button class="btn ghost" data-v="0">Plus tard</button><button class="btn primary" data-v="1">Voir le fil du groupe</button></div></div>';
+  const close=()=>m.remove();
+  m.querySelector('[data-v="0"]').onclick=close;
+  m.querySelector('[data-v="1"]').onclick=()=>{close();go("groupe");};
+  m.querySelectorAll(".post").forEach(x=>x.onclick=()=>{close();markSeen();openMember(x.dataset.uid);});
+  document.body.appendChild(m);
+}
+async function renderFeed(){
+  const box=$("grpFeed");if(!box||!SB||!USER)return;
+  if(!Object.keys(PROFS).length)await loadProfs();
+  const r=await SB.from("publications").select("*").order("cree_le",{ascending:false}).limit(25);
+  if(r.error){box.innerHTML='<div class="hint">'+esc(errFr(r.error))+'</div>';return;}
+  const list=r.data||[];
+  $("grpFeedMeta").textContent=list.length?list.length+" dernière(s)":"";
+  box.innerHTML=list.length?list.map(pubCard).join(""):'<div class="empty">'+ico("i-hist")+'Aucune sortie publiée pour l’instant. Chaque nouvelle sortie enregistrée par un membre apparaîtra ici.</div>';
+  box.querySelectorAll(".post").forEach(x=>x.onclick=()=>openMember(x.dataset.uid));
+}
+async function askNotifPermission(){
+  if(!("Notification" in window))return toast("Ce navigateur ne gère pas les notifications");
+  const p=await Notification.requestPermission();
+  toast(p==="granted"?"Notifications activées sur cet appareil":"Notifications refusées");renderAccount();
+}
 
 /* ================== Démarrage ================== */
 applyTheme();prepareForm();renderDash();initCloud();renderAccount();
