@@ -412,8 +412,34 @@ body.mv-open{overflow:hidden}
 .pp-c,.post-c{margin-top:6px;padding:6px 10px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:0 8px 8px 0;font-size:.88rem;font-style:italic;white-space:pre-line;overflow-wrap:anywhere}
 .post-c{margin:0 0 8px}
 .post-sub{color:var(--dim);font-size:.8rem;margin:-3px 0 6px}
+
+/* ---------- Médailles ---------- */
+.medal{--ms:56px;--mc:#d4a73c;width:var(--ms);height:var(--ms);flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:calc(var(--ms)*.48);line-height:1;
+  background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--mc) 55%,#fff) 0,var(--mc) 55%,color-mix(in srgb,var(--mc) 60%,#000) 100%);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--mc) 35%,transparent),inset 0 -3px 6px rgba(0,0,0,.25)}
+.medal.m-bronze{--mc:#b4743f}.medal.m-argent{--mc:#a9b1b8}.medal.m-or{--mc:#d4a73c}.medal.m-special{--mc:#8fa14e}
+.medal.off{filter:grayscale(1);opacity:.38}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mcard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:14px 10px}
+.mcard.got{border-color:color-mix(in srgb,var(--brass) 55%,var(--line));background:color-mix(in srgb,var(--brass) 8%,var(--field))}
+.mc-n{font-weight:600;font-size:.92rem}
+.mc-d{color:var(--muted);font-size:.78rem;min-height:2.2em}
+.mc-ok{color:var(--brass);font-size:.78rem;font-weight:600}
+.mc-bar{width:100%;height:6px;border-radius:3px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
+.mc-bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.mc-p{color:var(--dim);font-size:.74rem;font-family:var(--f-num)}
+.mrow{display:inline-flex;gap:3px;flex-wrap:wrap}
+.medal-post{cursor:default;align-items:center}
+.post-pop.medal-pop{border-color:color-mix(in srgb,var(--brass) 70%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--brass) 14%,var(--panel)),var(--panel) 60%)}
+.icon-pick{display:flex;flex-wrap:wrap;gap:6px}
+.icon-pick button{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--field);font-size:1.25rem;cursor:pointer}
+.icon-pick button.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 35%,transparent)}
+.rc-prev{display:flex;align-items:center;gap:12px;background:var(--field);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin:12px 0 4px}
+.rc-prev small{color:var(--muted)}
+.rc-h{margin:18px 0 10px;font-size:.95rem}
+.adm-row.off{opacity:.7}
 .nbadge{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--danger);color:#fff;font-size:.7rem;font-weight:700;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--panel)}
-[data-view="groupe"],[data-view="groupe"] .pill{position:relative}
+[data-view="groupe"],[data-view="groupe"] .pill,[data-view="recomp"],[data-view="recomp"] .pill{position:relative}
 </style>
 </head>
 <body>
@@ -474,13 +500,14 @@ body.mv-open{overflow:hidden}
         <button data-view="session" class="cta"><svg class="i"><use href="#i-plus"/></svg>Session</button>
         <button data-view="histo"><svg class="i"><use href="#i-hist"/></svg>Historique</button>
         <button data-view="groupe"><svg class="i"><use href="#i-users"/></svg>Groupe</button>
+        <button data-view="recomp"><svg class="i"><use href="#i-trophy"/></svg>Récompenses</button>
         <button data-view="sheet"><svg class="i"><use href="#i-sheet"/></svg>Tableur</button>
         <button data-view="regl"><svg class="i"><use href="#i-set"/></svg>Réglages</button>
       </nav>
       <div class="top-actions">
         <button class="icon-btn" id="topImport" title="Importer Excel / JSON"><svg class="i"><use href="#i-up"/></svg></button>
         <button class="icon-btn" id="topExport" title="Exporter Excel"><svg class="i"><use href="#i-xls"/></svg></button>
-        <button class="icon-btn" id="topAccount" title="Compte et synchronisation"><svg class="i"><use href="#i-user"/></svg><span class="sdot" id="syncDot" data-s="local"></span></button>
+        <button class="icon-btn" id="topAccount" title="Réglages, compte et synchronisation"><svg class="i"><use href="#i-user"/></svg><span class="sdot" id="syncDot" data-s="local"></span></button>
       </div>
     </div>
   </header>
@@ -710,6 +737,15 @@ body.mv-open{overflow:hidden}
     </div>
   </section>
 
+  <!-- =============== RÉCOMPENSES =============== -->
+  <section id="view-recomp" class="hidden">
+    <div class="page-head">
+      <div><div class="kicker">Groupe</div><h2>Récompenses</h2><p>Médailles gagnées selon vos résultats de chasse.</p></div>
+      <div class="btn-row" style="margin:0"><button class="btn icon" id="recRefresh" title="Actualiser"><svg class="i"><use href="#i-sync"/></svg></button></div>
+    </div>
+    <div id="recBody"></div>
+  </section>
+
   <!-- =============== RÉGLAGES =============== -->
   <section id="view-regl" class="hidden">
     <div class="page-head">
@@ -801,7 +837,7 @@ body.mv-open{overflow:hidden}
   <button data-view="histo"><span class="pill"><svg class="i"><use href="#i-hist"/></svg></span>Historique</button>
   <button data-view="session" class="cta"><span class="pill"><svg class="i"><use href="#i-plus"/></svg></span>Session</button>
   <button data-view="groupe"><span class="pill"><svg class="i"><use href="#i-users"/></svg></span>Groupe</button>
-  <button data-view="regl"><span class="pill"><svg class="i"><use href="#i-set"/></svg></span>Réglages</button>
+  <button data-view="recomp"><span class="pill"><svg class="i"><use href="#i-trophy"/></svg></span>Médailles</button>
 </nav>
 
 <div class="member-view hidden" id="memberView" role="dialog" aria-modal="true" aria-labelledby="mvName">
@@ -991,7 +1027,7 @@ function computeStats(list,season){
 }
 
 /* ================== Navigation ================== */
-const VIEWS=["dash","session","histo","groupe","sheet","regl"];
+const VIEWS=["dash","session","histo","groupe","recomp","sheet","regl"];
 function go(v,opts){
   VIEWS.forEach(k=>$("view-"+k).classList.toggle("hidden",k!==v));
   document.querySelectorAll("nav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
@@ -1000,6 +1036,7 @@ function go(v,opts){
   if(v==="sheet")renderSheet();
   if(v==="regl"){renderRegl();renderAccount();}
   if(v==="groupe")renderGroupe();
+  if(v==="recomp")renderRecomp();
   if(v==="session"&&!(opts&&opts.keep))prepareForm(opts&&opts.session);
   window.scrollTo(0,0);
 }
@@ -2290,7 +2327,7 @@ function setBadge(n){
   });
 }
 async function markSeen(){
-  if(!SB||!USER)return;setBadge(0);
+  if(!SB||!USER)return;setBadge(0);if(typeof setMedBadge==="function")setMedBadge(0);
   const now=new Date().toISOString();if(PROFIL)PROFIL.fil_vu_le=now;
   await SB.from("profils").update({fil_vu_le:now}).eq("id",USER.id);
 }
@@ -2301,12 +2338,12 @@ function showPostPop(p){
   el.innerHTML='<div class="avatar">'+esc(initials(a.pseudo))+'</div><div style="min-width:0;flex:1"><div class="pp-h">'+esc(a.pseudo)+' a publié '+(p.resume&&p.resume.titre?'« '+esc(p.resume.titre)+' »':'une sortie')+'</div><div class="pp-t">'+esc(pubLine(p.resume))+'</div>'+
     (p.resume&&p.resume.commentaire?'<div class="pp-c">'+esc(p.resume.commentaire.length>160?p.resume.commentaire.slice(0,157)+"…":p.resume.commentaire)+'</div>':"")+
     '<div class="pp-a"><button class="btn sm primary" data-pp="voir">Voir</button><button class="btn sm ghost" data-pp="fermer">Fermer</button></div></div>';
-  el.classList.remove("hidden");requestAnimationFrame(()=>el.classList.add("in"));
+  el.classList.remove("medal-pop");el.classList.remove("hidden");requestAnimationFrame(()=>el.classList.add("in"));
   el.querySelector('[data-pp="voir"]').onclick=()=>{hidePostPop();markSeen();openMember(p.user_id);};
   el.querySelector('[data-pp="fermer"]').onclick=hidePostPop;
   clearTimeout(POP_T);POP_T=setTimeout(hidePostPop,15000);
 }
-function hidePostPop(){const el=$("postPop");el.classList.remove("in");setTimeout(()=>el.classList.add("hidden"),250);}
+function hidePostPop(){const el=$("postPop");el.classList.remove("in");setTimeout(()=>{el.classList.add("hidden");el.classList.remove("medal-pop");},250);}
 function systemNotif(p){
   try{
     if(!("Notification" in window)||Notification.permission!=="granted"||!document.hidden)return;
@@ -2326,6 +2363,7 @@ async function startFeed(){
   setBadge(list.length);
   if(list.length===1)showPostPop(list[0]);
   else if(list.length>1)showUnreadModal(list);
+  unreadMedals(since).catch(()=>{});
   // Temps réel
   if(FIL_CH)SB.removeChannel(FIL_CH);
   FIL_CH=SB.channel("fil-groupe").on("postgres_changes",{event:"INSERT",schema:"public",table:"publications"},async payload=>{
@@ -2333,9 +2371,9 @@ async function startFeed(){
     if(!PROFS[p.user_id])await loadProfs();
     if(currentView()==="groupe"){renderFeed();markSeen();}else setBadge(FIL_UNREAD+1);
     showPostPop(p);systemNotif(p);
-  }).subscribe();
+  }).on("postgres_changes",{event:"INSERT",schema:"public",table:"recompenses_obtenues"},payload=>{onMedal(payload.new);}).subscribe();
 }
-function stopFeed(){if(FIL_CH&&SB)SB.removeChannel(FIL_CH);FIL_CH=null;setBadge(0);hidePostPop();}
+function stopFeed(){if(FIL_CH&&SB)SB.removeChannel(FIL_CH);FIL_CH=null;setBadge(0);setMedBadge(0);hidePostPop();}
 function showUnreadModal(list){
   const m=document.createElement("div");m.className="modal";
   m.innerHTML='<div class="box" role="dialog" aria-modal="true" style="max-width:480px"><h3>'+list.length+' nouvelles sorties dans le groupe</h3><div class="feed" style="max-height:55vh;overflow:auto;margin:10px 0">'+list.map(pubCard).join("")+'</div>'+
@@ -2351,16 +2389,209 @@ async function renderFeed(){
   if(!Object.keys(PROFS).length)await loadProfs();
   const r=await SB.from("publications").select("*").order("cree_le",{ascending:false}).limit(25);
   if(r.error){box.innerHTML='<div class="hint">'+esc(errFr(r.error))+'</div>';return;}
-  const list=r.data||[];
+  const ro=await SB.from("recompenses_obtenues").select("*").order("obtenue_le",{ascending:false}).limit(15);
+  if(!RECOMPS)await loadRecomps();
+  const items=(r.data||[]).map(p=>({t:p.cree_le,h:pubCard(p)})).concat((ro.error?[]:ro.data||[]).map(o=>{const m=medalLine(o);
+    return{t:o.obtenue_le,h:'<div class="post medal-post" data-medal="1">'+medalBadge(m.r,true,40)+'<div style="min-width:0;flex:1"><div class="post-h"><strong>'+esc(m.me?"Vous":m.a.pseudo)+'</strong> '+(m.me?"avez":"a")+' obtenu la médaille « '+esc(m.r.nom)+' »<span>'+esc(ago(o.obtenue_le))+'</span></div><div class="post-sub" style="margin:2px 0 0">'+esc(m.sub)+'</div></div></div>'};}))
+    .sort((a,b)=>String(b.t).localeCompare(String(a.t))).slice(0,30);
+  const list=items;
   $("grpFeedMeta").textContent=list.length?list.length+" dernière(s)":"";
-  box.innerHTML=list.length?list.map(pubCard).join(""):'<div class="empty">'+ico("i-hist")+'Aucune sortie publiée pour l’instant. Chaque nouvelle sortie enregistrée par un membre apparaîtra ici.</div>';
-  box.querySelectorAll(".post").forEach(x=>x.onclick=()=>openMember(x.dataset.uid));
+  box.innerHTML=list.length?list.map(x=>x.h).join(""):'<div class="empty">'+ico("i-hist")+'Aucune sortie publiée pour l’instant. Chaque nouvelle sortie enregistrée par un membre apparaîtra ici.</div>';
+  box.querySelectorAll('.medal-post').forEach(x=>x.onclick=()=>go("recomp"));
+  box.querySelectorAll(".post[data-uid]").forEach(x=>x.onclick=()=>openMember(x.dataset.uid));
 }
 async function askNotifPermission(){
   if(!("Notification" in window))return toast("Ce navigateur ne gère pas les notifications");
   const p=await Notification.requestPermission();
   toast(p==="granted"?"Notifications activées sur cet appareil":"Notifications refusées");renderAccount();
 }
+
+/* ---------- Récompenses / médailles ---------- */
+const CRIT={pieces:["Pièces prélevées","pièce(s)"],cartouches:["Cartouches tirées","cartouche(s)"],sorties:["Sorties","sortie(s)"],km:["Kilomètres marchés","km"],
+  vols:["Vols vus","vol(s)"],heures:["Heures de chasse","h"],espece:["Pièces d’une espèce","pièce(s)"]};
+const NIVEAUX={bronze:"Bronze",argent:"Argent",or:"Or",special:"Spéciale"};
+const ICONES=["🏅","🥇","🥈","🥉","🏆","🎖️","🔥","🎯","🕊️","🦆","🐗","🦌","🐇","🐦","🌅","🌙","⭐","💥","👑","🐕"];
+let RECOMPS=null,MED_UNREAD=0;
+async function loadRecomps(){
+  const r=await SB.from("recompenses").select("*").order("id");
+  RECOMPS=r.error?[]:(r.data||[]);
+  return RECOMPS;
+}
+function recompById(id){return(RECOMPS||[]).find(x=>x.id===id);}
+function critText(r){
+  const c=CRIT[r.critere]||[r.critere,""];
+  const what=r.critere==="espece"?(fmtNum(r.seuil)+" "+r.espece.toLowerCase()+(r.seuil>1?"s":"")+" prélevée"+(r.seuil>1?"s":"")):(fmtNum(r.seuil)+" "+c[1]+" — "+c[0].toLowerCase());
+  return what+(r.periode==="saison"?" dans la saison":" au total");
+}
+function medalBadge(r,earned,size){
+  return'<span class="medal m-'+esc(r.niveau||"or")+(earned?"":" off")+'"'+(size?' style="--ms:'+size+'px"':"")+' aria-hidden="true">'+esc(r.icone||"🏅")+'</span>';
+}
+function myValue(r){
+  const y=seasonOf(todayISO());
+  const list=DB.sessions.filter(s=>r.periode==="total"||seasonOf(s.date)===y);
+  switch(r.critere){
+    case"pieces":return sumStatut(list,"tuee");
+    case"cartouches":return list.reduce((a,s)=>a+Number(s.cartouches||0),0);
+    case"sorties":return list.length;
+    case"km":return list.reduce((a,s)=>a+Number(s.km||0),0);
+    case"vols":{const d={};list.forEach(s=>{d[s.date]=Math.max(d[s.date]||0,Number(s.vols||0));});return Object.values(d).reduce((a,b)=>a+b,0);}
+    case"heures":return list.reduce((a,s)=>a+Number(s.duree||0),0)/60;
+    case"espece":{const n=norm(r.espece);return list.reduce((a,s)=>a+(s.especes||[]).filter(e=>e.statut==="tuee"&&norm(e.nom)===n).reduce((b,e)=>b+Number(e.nombre||0),0),0);}
+  }
+  return 0;
+}
+function setMedBadge(n){
+  MED_UNREAD=Math.max(0,n);
+  document.querySelectorAll('[data-view="recomp"]').forEach(b=>{
+    let x=b.querySelector(".nbadge");
+    if(!MED_UNREAD){if(x)x.remove();return;}
+    if(!x){x=document.createElement("span");x.className="nbadge";(b.querySelector(".pill")||b).appendChild(x);}
+    x.textContent=MED_UNREAD>9?"9+":MED_UNREAD;
+  });
+}
+function medalLine(o){
+  const r=recompById(o.recompense_id)||{nom:"Récompense",icone:"🏅",niveau:"or"};
+  const a=PROFS[o.user_id]||{pseudo:"Un membre"},me=USER&&o.user_id===USER.id;
+  return{r:r,a:a,me:me,title:(me?"Vous avez":a.pseudo+" a")+" obtenu la médaille « "+r.nom+" »",
+    sub:(r.description||critText(r))+(o.saison?" · "+seasonLabel(o.saison):"")};
+}
+function showMedalPop(o){
+  const m=medalLine(o),el=$("postPop");
+  el.classList.add("medal-pop");
+  el.innerHTML=medalBadge(m.r,true,52)+'<div style="min-width:0;flex:1"><div class="pp-h">'+esc(m.title)+'</div><div class="pp-t">'+esc(m.sub)+'</div>'+
+    '<div class="pp-a"><button class="btn sm gold" data-pp="voir">Voir les récompenses</button><button class="btn sm ghost" data-pp="fermer">Fermer</button></div></div>';
+  el.classList.remove("hidden");requestAnimationFrame(()=>el.classList.add("in"));
+  el.querySelector('[data-pp="voir"]').onclick=()=>{hidePostPop();go("recomp");};
+  el.querySelector('[data-pp="fermer"]').onclick=hidePostPop;
+  clearTimeout(POP_T);POP_T=setTimeout(hidePostPop,15000);
+}
+function medalNotif(o){
+  try{
+    if(!("Notification" in window)||Notification.permission!=="granted"||!document.hidden)return;
+    const m=medalLine(o),opt={body:m.sub,icon:"icon-192.png",badge:"icon-192.png",tag:"med-"+o.id};
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification((m.r.icone||"🏅")+" "+m.title,opt)).catch(()=>{});
+  }catch(e){}
+}
+async function onMedal(o){
+  if(!o)return;
+  if(!recompById(o.recompense_id))await loadRecomps();
+  if(!PROFS[o.user_id])await loadProfs();
+  if(currentView()==="recomp")renderRecomp();else setMedBadge(MED_UNREAD+1);
+  if(currentView()==="groupe")renderFeed();
+  showMedalPop(o);medalNotif(o);
+}
+async function unreadMedals(since){
+  const r=await SB.from("recompenses_obtenues").select("*").gt("obtenue_le",since).order("obtenue_le",{ascending:false}).limit(20);
+  const list=r.error?[]:(r.data||[]);
+  if(!list.length)return;
+  await loadRecomps();
+  setMedBadge(list.length);
+  setTimeout(()=>showMedalPop(list[0]),list.length?1800:0);
+}
+async function renderRecomp(){
+  const body=$("recBody");
+  if(!CFG_OK||!SB||!USER){body.innerHTML='<div class="panel gate">'+ico("i-trophy")+'<h3>Connectez-vous pour voir les récompenses</h3><p>Les médailles sont liées à votre compte et partagées avec le groupe.</p></div>';return;}
+  setMedBadge(0);
+  body.innerHTML='<div class="empty">Chargement…</div>';
+  const [rr,ro]=await Promise.all([loadRecomps(),SB.from("recompenses_obtenues").select("*").order("obtenue_le",{ascending:false}).limit(400)]);
+  await loadProfs();
+  const obt=ro.error?[]:(ro.data||[]);
+  const y=seasonOf(todayISO()),isAdmin=PROFIL&&PROFIL.role==="admin"&&PROFIL.statut==="actif";
+  const actives=RECOMPS.filter(r=>r.actif);
+  const mine=obt.filter(o=>o.user_id===USER.id);
+  const gotNow=r=>mine.find(o=>o.recompense_id===r.id&&(r.periode==="total"?o.saison===0:o.saison===y));
+  // Mes médailles
+  const cards=actives.map(r=>{
+    const g=gotNow(r),v=myValue(r),pct=Math.max(0,Math.min(100,v/r.seuil*100));
+    return'<div class="mcard'+(g?" got":"")+'">'+medalBadge(r,!!g)+'<div class="mc-n">'+esc(r.nom)+'</div><div class="mc-d">'+esc(r.description||critText(r))+'</div>'+
+      (g?'<div class="mc-ok">Obtenue le '+esc(new Date(g.obtenue_le).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}))+'</div>'
+        :'<div class="mc-bar" title="'+esc(fmtNum(Math.round(v*10)/10)+" / "+fmtNum(r.seuil))+'"><i style="width:'+pct+'%"></i></div><div class="mc-p">'+esc(fmtNum(Math.round(v*10)/10)+" / "+fmtNum(r.seuil))+'</div>')+'</div>';
+  }).join("");
+  const nbMine=mine.length;
+  // Palmarès
+  const feed=obt.slice(0,30).map(o=>{const m=medalLine(o);return'<div class="post medal-post">'+medalBadge(m.r,true,40)+'<div style="min-width:0;flex:1"><div class="post-h"><strong>'+esc(m.me?"Vous":m.a.pseudo)+'</strong> '+(m.me?"avez":"a")+' obtenu « '+esc(m.r.nom)+' »<span>'+esc(ago(o.obtenue_le))+'</span></div><div class="post-sub" style="margin:2px 0 0">'+esc(m.sub)+'</div></div></div>';}).join("");
+  // Classement des médailles
+  const cnt={};obt.forEach(o=>{cnt[o.user_id]=(cnt[o.user_id]||0)+1;});
+  const rank=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([uid,n],i)=>{
+    const a=PROFS[uid]||{pseudo:"Membre"},icons=obt.filter(o=>o.user_id===uid).slice(0,6).map(o=>{const r=recompById(o.recompense_id);return r?medalBadge(r,true,24):"";}).join("");
+    return'<tr'+(uid===USER.id?' class="me"':"")+'><td><span class="rank">'+(i+1)+'</span></td><td><div class="who"><div class="avatar" style="width:30px;height:30px;font-size:.9rem">'+esc(initials(a.pseudo))+'</div><div class="nm">'+esc(a.pseudo)+'</div></div></td><td><span class="mrow">'+icons+'</span></td><td class="num"><strong>'+n+'</strong></td></tr>';}).join("");
+  let html='<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">'+
+      '<article class="stat"><div class="top"><span class="lbl">Mes médailles</span><span class="ic">'+ico("i-trophy")+'</span></div><div class="val">'+nbMine+'</div><div class="sub">sur '+actives.length+' récompense(s) active(s)</div></article>'+
+      '<article class="stat"><div class="top"><span class="lbl">Médailles du groupe</span><span class="ic">'+ico("i-users")+'</span></div><div class="val">'+obt.length+'</div><div class="sub">'+Object.keys(cnt).length+' chasseur(s) récompensé(s)</div></article></div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-trophy")+'</span>Mes médailles · '+esc(seasonLabel(y))+'</h3></div>'+
+      (actives.length?'<div class="mgrid">'+cards+'</div>':'<div class="empty">Aucune récompense active pour le moment.</div>')+
+      '<div class="hint">Les médailles sont attribuées automatiquement à l’enregistrement de vos sorties, et tout le groupe en est averti.</div></div>'+
+    '<div class="split">'+
+      '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-bird")+'</span>Dernières médailles du groupe</h3></div><div class="feed">'+(feed||'<div class="empty">Aucune médaille obtenue pour l’instant.</div>')+'</div></div>'+
+      '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-chart")+'</span>Classement des médailles</h3></div>'+
+        (rank?'<div class="scroll"><table><thead><tr><th>#</th><th>Chasseur</th><th>Médailles</th><th class="num">Total</th></tr></thead><tbody>'+rank+'</tbody></table></div>':'<div class="empty">Pas encore de classement.</div>')+'</div>'+
+    '</div>';
+  if(isAdmin)html+=adminRecompHTML(obt);
+  body.innerHTML=html;
+  if(isAdmin)bindAdminRecomp();
+  if(MED_UNREAD||FIL_UNREAD)markSeen();
+}
+function adminRecompHTML(obt){
+  const holders=id=>new Set(obt.filter(o=>o.recompense_id===id).map(o=>o.user_id)).size;
+  const especes=Array.from(new Set(["Palombe"].concat((typeof CATALOGUE!=="undefined"?CATALOGUE:[]).map(e=>e.nom||e)).concat(DB.sessions.flatMap(s=>(s.especes||[]).map(e=>e.nom))))).filter(Boolean).sort((a,b)=>a.localeCompare(b,"fr"));
+  const list=(RECOMPS||[]).map(r=>'<div class="adm-row'+(r.actif?"":" off")+'"><div class="who" style="align-items:flex-start">'+medalBadge(r,r.actif,40)+'<div style="min-width:0"><div class="nm">'+esc(r.nom)+' <span class="chip" style="padding:1px 8px">'+esc(NIVEAUX[r.niveau]||r.niveau)+'</span>'+(r.actif?"":' <span class="chip warn" style="padding:1px 8px">désactivée</span>')+'</div>'+
+    '<small>'+esc(critText(r))+'</small><div class="adm-meta"><span>'+holders(r.id)+' membre(s) récompensé(s)</span>'+(r.description?'<span>'+esc(r.description)+'</span>':"")+'</div></div></div>'+
+    '<div class="acts"><button class="btn sm" data-rc="toggle" data-id="'+r.id+'">'+(r.actif?"Désactiver":"Activer")+'</button><button class="btn sm danger" data-rc="suppr" data-id="'+r.id+'">Supprimer</button></div></div>').join("");
+  return'<div class="panel" id="recAdmin"><div class="panel-head"><h3><span class="ico" style="color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,transparent)">'+ico("i-shield")+'</span>Créer une récompense</h3><span class="meta">Administrateur</span></div>'+
+    '<div class="fgrid">'+
+      '<label class="field s2 s2m"><span class="n">Nom de la médaille</span><input id="rcNom" maxlength="60" placeholder="Ex. Roi de la palombe" /></label>'+
+      '<label class="field s2 s2m"><span class="n">Description (facultatif)</span><input id="rcDesc" maxlength="120" placeholder="Ex. 50 palombes dans la saison" /></label>'+
+      '<label class="field s2 s2m"><span class="n">Condition</span><select id="rcCrit">'+Object.entries(CRIT).map(([k,v])=>'<option value="'+k+'">'+esc(v[0])+'</option>').join("")+'</select></label>'+
+      '<label class="field s2 s2m hidden" id="rcEspWrap"><span class="n">Espèce</span><input id="rcEsp" list="rcEspList" value="Palombe" /><datalist id="rcEspList">'+especes.map(e=>'<option value="'+esc(e)+'">').join("")+'</datalist></label>'+
+      '<label class="field"><span class="n">Seuil à atteindre</span><input type="number" id="rcSeuil" min="1" step="1" value="10" inputmode="numeric" /></label>'+
+      '<label class="field"><span class="n">Période</span><select id="rcPer"><option value="saison">Dans la saison</option><option value="total">Au total (toutes saisons)</option></select></label>'+
+      '<label class="field"><span class="n">Niveau</span><select id="rcNiv">'+Object.entries(NIVEAUX).map(([k,v])=>'<option value="'+k+'"'+(k==="or"?" selected":"")+'>'+v+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="field"><span class="n-lbl">Icône</span><div class="icon-pick" id="rcIcons">'+ICONES.map((c,i)=>'<button type="button" data-ic="'+c+'"'+(i===0?' class="on"':"")+'>'+c+'</button>').join("")+'</div></div>'+
+    '<div class="rc-prev" id="rcPrev"></div>'+
+    '<div class="btn-row"><button class="btn gold" id="rcCreate">'+ico("i-plus")+'Créer et attribuer</button></div>'+
+    '<div class="hint">Dès la création, la médaille est attribuée aux membres qui remplissent déjà la condition, puis automatiquement à chaque nouvelle sortie. Tout le groupe reçoit l’alerte.</div>'+
+    '<h4 class="rc-h">Récompenses existantes</h4>'+(list||'<div class="empty">Aucune récompense.</div>')+'</div>';
+}
+function bindAdminRecomp(){
+  let icon=ICONES[0];
+  const prev=()=>{
+    const r={nom:$("rcNom").value.trim()||"Nom de la médaille",description:$("rcDesc").value.trim(),icone:icon,niveau:$("rcNiv").value,critere:$("rcCrit").value,espece:$("rcEsp").value.trim()||"Palombe",seuil:Number($("rcSeuil").value||0)||1,periode:$("rcPer").value};
+    $("rcEspWrap").classList.toggle("hidden",r.critere!=="espece");
+    $("rcPrev").innerHTML=medalBadge(r,true,46)+'<div><div class="nm">'+esc(r.nom)+'</div><small>'+esc(r.description||critText(r))+'</small></div>';
+    return r;
+  };
+  ["rcNom","rcDesc","rcCrit","rcEsp","rcSeuil","rcPer","rcNiv"].forEach(id=>{$(id).addEventListener("input",prev);$(id).addEventListener("change",prev);});
+  $("rcIcons").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;icon=b.dataset.ic;$("rcIcons").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));prev();};
+  prev();
+  $("rcCreate").onclick=async()=>{
+    const r=prev();
+    if(!$("rcNom").value.trim())return toast("Donnez un nom à la médaille");
+    if(!(r.seuil>0))return toast("Le seuil doit être supérieur à 0");
+    const row={nom:r.nom,description:r.description,icone:r.icone,niveau:r.niveau,critere:r.critere,espece:r.critere==="espece"?r.espece:null,seuil:r.seuil,periode:r.periode,cree_par:USER.id};
+    $("rcCreate").disabled=true;
+    const ins=await SB.from("recompenses").insert(row);
+    if(ins.error){$("rcCreate").disabled=false;return toast(errFr(ins.error));}
+    const ev=await SB.rpc("admin_reevaluer_recompenses");
+    toast("Récompense créée"+(ev.data?" · "+ev.data+" médaille(s) attribuée(s)":""));
+    renderRecomp();
+  };
+  $("recAdmin").addEventListener("click",async e=>{
+    const b=e.target.closest("[data-rc]");if(!b)return;
+    const id=Number(b.dataset.id),r=recompById(id);if(!r)return;
+    if(b.dataset.rc==="toggle"){
+      const u=await SB.from("recompenses").update({actif:!r.actif}).eq("id",id);
+      if(u.error)return toast(errFr(u.error));
+      if(!r.actif)await SB.rpc("admin_reevaluer_recompenses");
+      return renderRecomp();
+    }
+    if(!(await confirmBox("Supprimer « "+r.nom+" » ?","La récompense et toutes les médailles déjà obtenues pour elle seront supprimées.","Supprimer")))return;
+    const d=await SB.from("recompenses").delete().eq("id",id);
+    if(d.error)return toast(errFr(d.error));
+    toast("Récompense supprimée");renderRecomp();
+  });
+}
+$("recRefresh").onclick=()=>renderRecomp();
 
 /* ================== Démarrage ================== */
 applyTheme();prepareForm();renderDash();initCloud();renderAccount();
