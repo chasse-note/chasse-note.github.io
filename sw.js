@@ -1,6 +1,6 @@
 // Chasse Note — fonctionnement hors ligne (à la chasse, sans réseau).
 // Changez VERSION à chaque mise à jour du site pour forcer le rafraîchissement.
-const VERSION = "chasse-note-v8";
+const VERSION = "chasse-note-v9";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 const CDN = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com"];
 

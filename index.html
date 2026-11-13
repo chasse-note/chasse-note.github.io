@@ -438,6 +438,10 @@ body.mv-open{overflow:hidden}
 .rc-prev small{color:var(--muted)}
 .rc-h{margin:18px 0 10px;font-size:.95rem}
 .adm-row.off{opacity:.7}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.med-chip{cursor:pointer;font:inherit;font-size:.82rem;color:var(--brass);border-color:color-mix(in srgb,var(--brass) 50%,transparent);background:color-mix(in srgb,var(--brass) 12%,transparent);gap:6px}
+.med-chip strong{font-family:var(--f-num);font-size:1rem;color:var(--text)}
+.med-chip .medal{box-shadow:none}
 .nbadge{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--danger);color:#fff;font-size:.7rem;font-weight:700;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--panel)}
 [data-view="groupe"],[data-view="groupe"] .pill,[data-view="recomp"],[data-view="recomp"] .pill{position:relative}
 </style>
@@ -529,7 +533,10 @@ body.mv-open{overflow:hidden}
     <div class="hero">
       <div class="hero-top">
         <div class="season-pick"><svg class="i"><use href="#i-cal"/></svg><select id="seasonSel"></select></div>
-        <span class="chip" id="heroArme"><svg class="i" style="width:14px;height:14px"><use href="#i-cross"/></svg><span></span></span>
+        <div class="hero-chips">
+          <button type="button" class="chip med-chip hidden" id="heroMed" title="Voir mes récompenses"></button>
+          <span class="chip" id="heroArme"><svg class="i" style="width:14px;height:14px"><use href="#i-cross"/></svg><span></span></span>
+        </div>
       </div>
       <div class="hero-main">
         <div class="hero-big"><div class="n" id="heroTues">0</div><div class="l">pièces prélevées</div></div>
@@ -1062,6 +1069,7 @@ function renderDash(){
   $("brandSub").textContent=(DB.settings.nom?DB.settings.nom+" · ":"")+(DB.settings.commune||"Carnet de chasse");
   $("heroTues").textContent=st.tues;
   $("heroArme").querySelector("span").textContent=p.nom?(p.nom+(p.calibre?" · "+p.calibre:"")):"Aucune arme";
+  if(typeof renderHeroMedals==="function")renderHeroMedals();
   $("heroMini").innerHTML=[[st.sessions,"Sorties"],[st.cart,"Cartouches"],[st.ratio,"Cart./pièce"],[st.vols,"Vols vus"]].map(x=>'<div class="mini"><div class="n">'+esc(x[0])+'</div><div class="l">'+x[1]+'</div></div>').join("");
   const tot=st.tues+st.vues+st.bless+st.perd;
   $("heroBar").innerHTML=tot?[["tuee",st.tues],["vue",st.vues],["blessee",st.bless],["perdue",st.perd]].map(x=>'<span style="width:'+(x[1]/tot*100)+'%;background:var(--'+x[0]+')"></span>').join(""):"";
@@ -2364,6 +2372,7 @@ async function startFeed(){
   if(list.length===1)showPostPop(list[0]);
   else if(list.length>1)showUnreadModal(list);
   unreadMedals(since).catch(()=>{});
+  loadMyMedals().catch(()=>{});
   // Temps réel
   if(FIL_CH)SB.removeChannel(FIL_CH);
   FIL_CH=SB.channel("fil-groupe").on("postgres_changes",{event:"INSERT",schema:"public",table:"publications"},async payload=>{
@@ -2373,7 +2382,7 @@ async function startFeed(){
     showPostPop(p);systemNotif(p);
   }).on("postgres_changes",{event:"INSERT",schema:"public",table:"recompenses_obtenues"},payload=>{onMedal(payload.new);}).subscribe();
 }
-function stopFeed(){if(FIL_CH&&SB)SB.removeChannel(FIL_CH);FIL_CH=null;setBadge(0);setMedBadge(0);hidePostPop();}
+function stopFeed(){if(FIL_CH&&SB)SB.removeChannel(FIL_CH);FIL_CH=null;setBadge(0);setMedBadge(0);hidePostPop();MY_MEDS=null;renderHeroMedals();}
 function showUnreadModal(list){
   const m=document.createElement("div");m.className="modal";
   m.innerHTML='<div class="box" role="dialog" aria-modal="true" style="max-width:480px"><h3>'+list.length+' nouvelles sorties dans le groupe</h3><div class="feed" style="max-height:55vh;overflow:auto;margin:10px 0">'+list.map(pubCard).join("")+'</div>'+
@@ -2474,11 +2483,30 @@ function medalNotif(o){
 }
 async function onMedal(o){
   if(!o)return;
+  if(USER&&o.user_id===USER.id&&MY_MEDS&&!MY_MEDS.some(x=>x.id===o.id)){MY_MEDS.push(o);renderHeroMedals();}
   if(!recompById(o.recompense_id))await loadRecomps();
   if(!PROFS[o.user_id])await loadProfs();
   if(currentView()==="recomp")renderRecomp();else setMedBadge(MED_UNREAD+1);
   if(currentView()==="groupe")renderFeed();
   showMedalPop(o);medalNotif(o);
+}
+let MY_MEDS=null;
+async function loadMyMedals(){
+  if(!SB||!USER)return;
+  const r=await SB.from("recompenses_obtenues").select("*").eq("user_id",USER.id);
+  if(r.error)return;
+  MY_MEDS=r.data||[];
+  if(!RECOMPS)await loadRecomps();
+  renderHeroMedals();
+}
+function renderHeroMedals(){
+  const el=$("heroMed");if(!el)return;
+  if(!USER||!MY_MEDS){el.classList.add("hidden");return;}
+  const list=VIEW_SEASON==="all"?MY_MEDS:MY_MEDS.filter(o=>o.saison===VIEW_SEASON||o.saison===0);
+  const icons=list.slice().sort((a,b)=>String(b.obtenue_le).localeCompare(String(a.obtenue_le))).slice(0,3).map(o=>{const r=recompById(o.recompense_id);return r?medalBadge(r,true,20):"";}).join("");
+  el.innerHTML=(icons||'<span aria-hidden="true">🏅</span>')+'<strong>'+list.length+'</strong> médaille'+(list.length>1?"s":"");
+  el.title=list.length+" médaille(s) "+(VIEW_SEASON==="all"?"au total":"sur "+seasonLabel(VIEW_SEASON))+" — voir mes récompenses";
+  el.classList.remove("hidden");
 }
 async function unreadMedals(since){
   const r=await SB.from("recompenses_obtenues").select("*").gt("obtenue_le",since).order("obtenue_le",{ascending:false}).limit(20);
@@ -2592,6 +2620,7 @@ function bindAdminRecomp(){
   });
 }
 $("recRefresh").onclick=()=>renderRecomp();
+$("heroMed").onclick=()=>go("recomp");
 
 /* ================== Démarrage ================== */
 applyTheme();prepareForm();renderDash();initCloud();renderAccount();
