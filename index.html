@@ -2350,6 +2350,7 @@ function showPostPop(p){
   el.querySelector('[data-pp="voir"]').onclick=()=>{hidePostPop();markSeen();openMember(p.user_id);};
   el.querySelector('[data-pp="fermer"]').onclick=hidePostPop;
   clearTimeout(POP_T);POP_T=setTimeout(hidePostPop,15000);
+  markSeen();
 }
 function hidePostPop(){const el=$("postPop");el.classList.remove("in");setTimeout(()=>{el.classList.add("hidden");el.classList.remove("medal-pop");},250);}
 function systemNotif(p){
@@ -2389,6 +2390,7 @@ function showUnreadModal(list){
     '<div class="btn-row"><button class="btn ghost" data-v="0">Plus tard</button><button class="btn primary" data-v="1">Voir le fil du groupe</button></div></div>';
   const close=()=>m.remove();
   m.querySelector('[data-v="0"]').onclick=close;
+  markSeen();
   m.querySelector('[data-v="1"]').onclick=()=>{close();go("groupe");};
   m.querySelectorAll(".post").forEach(x=>x.onclick=()=>{close();markSeen();openMember(x.dataset.uid);});
   document.body.appendChild(m);
@@ -2473,6 +2475,7 @@ function showMedalPop(o){
   el.querySelector('[data-pp="voir"]').onclick=()=>{hidePostPop();go("recomp");};
   el.querySelector('[data-pp="fermer"]').onclick=hidePostPop;
   clearTimeout(POP_T);POP_T=setTimeout(hidePostPop,15000);
+  markSeen();
 }
 function medalNotif(o){
   try{
