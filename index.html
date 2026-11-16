@@ -438,6 +438,38 @@ body.mv-open{overflow:hidden}
 .rc-prev small{color:var(--muted)}
 .rc-h{margin:18px 0 10px;font-size:.95rem}
 .adm-row.off{opacity:.7}
+
+/* ---------- Formulaire paramétrable ---------- */
+.form-blocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.form-blocks>.panel{margin:0}
+.form-blocks>.wide{grid-column:1/-1}
+@media (max-width:899px){.form-blocks{grid-template-columns:1fr}}
+.sp-quick{margin-bottom:12px}
+.sp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sp-chips .chip{cursor:pointer;font:inherit;font-size:.84rem;padding:6px 11px}
+.sp-chips .chip:hover{border-color:var(--accent);color:var(--text)}
+.sp-row.flash{box-shadow:0 0 0 2px var(--accent)}
+.xtog{display:inline-flex;margin-top:4px}
+.plist,.slist{display:flex;flex-direction:column;gap:8px}
+.slist{margin-top:12px;max-height:520px;overflow:auto;padding-right:4px}
+.prow,.srow{display:flex;gap:10px;align-items:flex-start;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:10px}
+.srow{align-items:center;padding:8px 10px}
+.prow.off,.srow.off{opacity:.55}
+.pmove{display:flex;flex-direction:column;gap:4px}
+.srow .pmove{flex-direction:row}
+.pmove .btn{width:30px;height:28px;padding:0;font-size:.7rem}
+.pmain{flex:1;min-width:0}
+.pline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ptitle{flex:1;min-width:160px}
+.pchamps{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+.pchamps .tog{font-size:.85rem}
+.sname{flex:1;min-width:0}
+.sname small{display:block;color:var(--dim);font-size:.76rem}
+.bfields{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.bfield{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+.bfield .bf-opt{grid-column:1/3}
+@media (max-width:560px){.bfield{grid-template-columns:1fr auto}.bfield .bf-type{grid-column:1}.bfield .bf-opt{grid-column:1/-1}}
+.mv-extra{margin-top:8px}
 .hero-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .med-chip{cursor:pointer;font:inherit;font-size:.82rem;color:var(--brass);border-color:color-mix(in srgb,var(--brass) 50%,transparent);background:color-mix(in srgb,var(--brass) 12%,transparent);gap:6px}
 .med-chip strong{font-family:var(--f-num);font-size:1rem;color:var(--text)}
@@ -505,6 +537,7 @@ body.mv-open{overflow:hidden}
         <button data-view="histo"><svg class="i"><use href="#i-hist"/></svg>Historique</button>
         <button data-view="groupe"><svg class="i"><use href="#i-users"/></svg>Groupe</button>
         <button data-view="recomp"><svg class="i"><use href="#i-trophy"/></svg>Récompenses</button>
+        <button data-view="param" class="hidden"><svg class="i"><use href="#i-set"/></svg>Paramétrage</button>
         <button data-view="sheet"><svg class="i"><use href="#i-sheet"/></svg>Tableur</button>
         <button data-view="regl"><svg class="i"><use href="#i-set"/></svg>Réglages</button>
       </nav>
@@ -594,48 +627,44 @@ body.mv-open{overflow:hidden}
       <div><div class="kicker">Sortie</div><h2 id="formTitle">Nouvelle session</h2><p id="formSub">Renseignez votre sortie, les espèces et les vols observés.</p></div>
     </div>
     <input type="hidden" id="editId" />
-    <div class="split">
-      <div>
-        <div class="panel">
-          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-bird"/></svg></span>Publication au groupe</h3></div>
-          <label class="field"><span class="n">Nom de la sortie</span><input type="text" id="sTitre" maxlength="80" placeholder="Ex. Belle matinée à la palombière" /></label>
-          <label class="field" style="margin-bottom:0"><span class="n">Commentaire pour le groupe</span><textarea id="sComment" maxlength="500" placeholder="Un mot sur la sortie : il sera affiché dans l’alerte envoyée aux membres." style="min-height:72px"></textarea></label>
+    <div class="form-blocks" id="formBlocks">
+        <div class="panel" data-bloc="pub">
+          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-bird"/></svg></span><span class="bt" data-def="Publication au groupe">Publication au groupe</span></h3></div>
+          <label class="field" data-champ="titre"><span class="n">Nom de la sortie</span><input type="text" id="sTitre" maxlength="80" placeholder="Ex. Belle matinée à la palombière" /></label>
+          <label class="field" data-champ="commentaire" style="margin-bottom:0"><span class="n">Commentaire pour le groupe</span><textarea id="sComment" maxlength="500" placeholder="Un mot sur la sortie : il sera affiché dans l’alerte envoyée aux membres." style="min-height:72px"></textarea></label>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-cal"/></svg></span>Quand</h3></div>
+        <div class="panel" data-bloc="quand">
+          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-cal"/></svg></span><span class="bt" data-def="Quand">Quand</span></h3></div>
           <div class="fgrid">
             <label class="field s2 s2m"><span class="n">Date</span><input type="date" id="sDate" /></label>
-            <label class="field"><span class="n">Début</span><input type="time" id="sDebut" /></label>
-            <label class="field"><span class="n">Fin</span><input type="time" id="sFin" /></label>
-            <label class="field s2"><span class="n">Durée (minutes)</span><input type="number" id="sDuree" min="0" step="5" inputmode="numeric" placeholder="Calculée depuis début / fin" /></label>
+            <label class="field" data-champ="debut"><span class="n">Début</span><input type="time" id="sDebut" /></label>
+            <label class="field" data-champ="fin"><span class="n">Fin</span><input type="time" id="sFin" /></label>
+            <label class="field s2" data-champ="duree"><span class="n">Durée (minutes)</span><input type="number" id="sDuree" min="0" step="5" inputmode="numeric" placeholder="Calculée depuis début / fin" /></label>
           </div>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-pin"/></svg></span>Où & avec qui</h3></div>
+        <div class="panel" data-bloc="ou">
+          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-pin"/></svg></span><span class="bt" data-def="Où & avec qui">Où & avec qui</span></h3></div>
           <div class="fgrid">
-            <label class="field s2"><span class="n">Lieu</span><input type="text" id="sLieu" list="listeLieux" placeholder="Commune, lieu-dit, poste…" /><datalist id="listeLieux"></datalist></label>
-            <label class="field s2"><span class="n">Avec qui</span><input type="text" id="sAvec" list="listeCompagnons" placeholder="Séparez par des virgules" /><datalist id="listeCompagnons"></datalist></label>
-            <label class="field"><span class="n">Km marchés</span><input type="number" id="sKm" min="0" step="0.1" value="0" inputmode="decimal" /></label>
-            <label class="field"><span class="n">Postes / espaces</span><input type="number" id="sEspaces" min="0" value="1" inputmode="numeric" /></label>
+            <label class="field s2" data-champ="lieu"><span class="n">Lieu</span><input type="text" id="sLieu" list="listeLieux" placeholder="Commune, lieu-dit, poste…" /><datalist id="listeLieux"></datalist></label>
+            <label class="field s2" data-champ="avec"><span class="n">Avec qui</span><input type="text" id="sAvec" list="listeCompagnons" placeholder="Séparez par des virgules" /><datalist id="listeCompagnons"></datalist></label>
+            <label class="field" data-champ="km"><span class="n">Km marchés</span><input type="number" id="sKm" min="0" step="0.1" value="0" inputmode="decimal" /></label>
+            <label class="field" data-champ="espaces"><span class="n">Postes / espaces</span><input type="number" id="sEspaces" min="0" value="1" inputmode="numeric" /></label>
           </div>
         </div>
-      </div>
-      <div>
-        <div class="panel">
-          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-cross"/></svg></span>Équipement & vols</h3></div>
-          <label class="field"><span class="n">Arme</span><select id="sArme"></select></label>
+        <div class="panel" data-bloc="equip">
+          <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-cross"/></svg></span><span class="bt" data-def="Équipement & vols">Équipement & vols</span></h3></div>
+          <label class="field" data-champ="arme"><span class="n">Arme</span><select id="sArme"></select></label>
           <div class="fgrid" style="grid-template-columns:1fr 1fr">
-            <div class="field" style="margin-bottom:12px"><span class="n-lbl">Cartouches</span>
+            <div class="field" data-champ="cartouches" style="margin-bottom:12px"><span class="n-lbl">Cartouches</span>
               <div class="stepper"><button type="button" data-step="sCart:-1">−</button><input type="number" id="sCart" min="0" value="0" inputmode="numeric" /><button type="button" data-step="sCart:1">+</button></div></div>
-            <div class="field" style="margin-bottom:12px"><span class="n-lbl">Vols vus</span>
+            <div class="field" data-champ="vols" style="margin-bottom:12px"><span class="n-lbl">Vols vus</span>
               <div class="stepper"><button type="button" data-step="sVols:-1">−</button><input type="number" id="sVols" min="0" value="0" inputmode="numeric" /><button type="button" data-step="sVols:1">+</button></div></div>
           </div>
-          <label class="field" style="margin-bottom:0"><span class="n">Observations</span><textarea id="sNotes" placeholder="Conditions, comportement du gibier, chiens…"></textarea></label>
+          <label class="field" data-champ="notes" style="margin-bottom:0"><span class="n">Observations</span><textarea id="sNotes" placeholder="Conditions, comportement du gibier, chiens…"></textarea></label>
         </div>
-      </div>
-    </div>
-    <div class="panel" style="margin-top:14px">
-      <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-target"/></svg></span>Espèces</h3><span class="meta" id="spCount"></span></div>
+    <div class="panel wide" data-bloc="especes">
+      <div class="panel-head"><h3><span class="ico"><svg class="i"><use href="#i-target"/></svg></span><span class="bt" data-def="Espèces">Espèces</span></h3><span class="meta" id="spCount"></span></div>
+      <div class="sp-quick hidden" id="spQuick"></div>
       <div id="speciesList"></div>
       <div class="btn-row">
         <button class="btn" id="btnAddEspece"><svg class="i"><use href="#i-plus"/></svg>Ajouter une ligne</button>
@@ -649,6 +678,7 @@ body.mv-open{overflow:hidden}
         </div>
         <div class="btn-row" style="margin-top:0"><button class="btn primary" id="btnSaveCat">Ajouter</button><button class="btn ghost" id="btnCancelCat">Annuler</button></div>
       </div>
+    </div>
     </div>
     <div class="savebar">
       <div class="grow" id="sessionHint"></div>
@@ -753,6 +783,15 @@ body.mv-open{overflow:hidden}
     <div id="recBody"></div>
   </section>
 
+  <!-- =============== PARAMÉTRAGE (admin) =============== -->
+  <section id="view-param" class="hidden">
+    <div class="page-head">
+      <div><div class="kicker">Administration</div><h2>Paramétrage</h2><p>Personnalisez le formulaire « Nouvelle session » pour tous les membres du groupe.</p></div>
+      <div class="btn-row" style="margin:0"><button class="btn" data-go="session"><svg class="i"><use href="#i-eye"/></svg>Voir le formulaire</button></div>
+    </div>
+    <div id="paramBody"></div>
+  </section>
+
   <!-- =============== RÉGLAGES =============== -->
   <section id="view-regl" class="hidden">
     <div class="page-head">
@@ -826,6 +865,7 @@ body.mv-open{overflow:hidden}
         <div class="panel danger-zone">
           <div class="panel-head"><h3><span class="ico" style="color:var(--danger);background:color-mix(in srgb,var(--danger) 15%,transparent)"><svg class="i"><use href="#i-trash"/></svg></span>Zone sensible</h3></div>
           <p class="hint" style="margin-top:0">Pensez à exporter une sauvegarde Excel avant d’effacer. Si vous êtes connecté, la copie en ligne de votre carnet est aussi vidée.</p>
+          <button class="btn gold admin-only hidden" data-go="param"><svg class="i"><use href="#i-set"/></svg>Paramétrage du formulaire (admin)</button>
           <button class="btn danger" id="btnWipe"><svg class="i"><use href="#i-trash"/></svg>Effacer toutes les données</button>
         </div>
       </div>
@@ -987,7 +1027,8 @@ function applyTheme(t){
 }
 
 /* ================== Espèces / armes ================== */
-function allEspeces(){return CATALOGUE.filter(e=>e.nom!==LIBRE).concat(DB.settings.especesCustom||[]).concat([CATALOGUE[CATALOGUE.length-1]]);}
+function allEspeces(){const g=(typeof FORM_CFG!=="undefined"&&FORM_CFG&&FORM_CFG.especes&&FORM_CFG.especes.ajout)||[];const seen=new Set();
+  return CATALOGUE.filter(e=>e.nom!==LIBRE).concat(g).concat(DB.settings.especesCustom||[]).filter(e=>e&&e.nom&&!seen.has(e.nom)&&seen.add(e.nom)).concat([CATALOGUE[CATALOGUE.length-1]]);}
 function findEspece(nom){return allEspeces().find(e=>e.nom===nom)||{nom:nom,ref:"",type:"Libre"};}
 function armePrincipale(){const l=DB.settings.armes||[];return l.find(a=>a.principale)||l[0]||{nom:"",calibre:""};}
 function armesOptions(){const l=(DB.settings.armes||[]).map(a=>a.nom).filter(Boolean);return l.length?l:["Arme non précisée"];}
@@ -1034,7 +1075,7 @@ function computeStats(list,season){
 }
 
 /* ================== Navigation ================== */
-const VIEWS=["dash","session","histo","groupe","recomp","sheet","regl"];
+const VIEWS=["dash","session","histo","groupe","recomp","param","sheet","regl"];
 function go(v,opts){
   VIEWS.forEach(k=>$("view-"+k).classList.toggle("hidden",k!==v));
   document.querySelectorAll("nav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
@@ -1044,6 +1085,7 @@ function go(v,opts){
   if(v==="regl"){renderRegl();renderAccount();}
   if(v==="groupe")renderGroupe();
   if(v==="recomp")renderRecomp();
+  if(v==="param")renderParam();
   if(v==="session"&&!(opts&&opts.keep))prepareForm(opts&&opts.session);
   window.scrollTo(0,0);
 }
@@ -1125,7 +1167,7 @@ $("btnSaveVol").onclick=()=>{const t=todayISO();const cur=DB.passages[t]||{nombr
 /* ================== SESSION ================== */
 function speciesOptions(selected){
   const groups={"Oiseau":[],"Mammifère":[],"Libre":[]};
-  allEspeces().forEach(e=>(groups[e.type]||groups.Libre).push(e));
+  especesFormulaire().concat([CATALOGUE[CATALOGUE.length-1]]).forEach(e=>(groups[e.type]||groups.Libre).push(e));
   let found=false,html="";
   Object.keys(groups).forEach(g=>{if(!groups[g].length)return;html+='<optgroup label="'+(g==="Libre"?"Autres":g+"s")+'">';groups[g].forEach(e=>{const s=e.nom===selected;if(s)found=true;html+='<option value="'+esc(e.nom)+'"'+(s?" selected":"")+'>'+esc(e.nom)+'</option>';});html+="</optgroup>";});
   if(selected&&!found)html='<option value="'+esc(selected)+'" selected>'+esc(selected)+'</option>'+html;
@@ -1134,7 +1176,8 @@ function speciesOptions(selected){
 function addSpeciesRow(data){
   data=data||{};
   const row=document.createElement("div");row.className="sp-row";
-  const nom=data.nom||"Palombe",statut=data.statut||"vue",nb=data.nombre!=null?data.nombre:1;
+  const vis=especesFormulaire(),defE=FORM_CFG.especes.defaut;
+  const nom=data.nom||(vis.some(e=>e.nom===defE)?defE:(vis[0]||{nom:"Palombe"}).nom),statut=data.statut||FORM_CFG.especes.statut||"vue",nb=data.nombre!=null?data.nombre:1;
   row.dataset.st=statut;
   row.innerHTML='<label class="field sp-name" style="margin:0"><span class="n">Espèce</span><select class="sp-nom">'+speciesOptions(nom)+'</select><input class="sp-custom hidden" placeholder="Nom de l’espèce" value="'+esc(data.custom||"")+'" /></label>'+
     '<div><span class="n-lbl">Nombre</span><div class="stepper"><button type="button" class="mn">−</button><input class="sp-nb" type="number" min="0" value="'+Number(nb)+'" inputmode="numeric" /><button type="button" class="pl">+</button></div></div>'+
@@ -1197,6 +1240,7 @@ function prepareForm(s){
   $("sNotes").value=s&&s.notes?s.notes:"";
   $("sTitre").value=s&&s.titre?s.titre:"";
   $("sComment").value=s&&s.commentaire?s.commentaire:"";
+  fillExtra(s);
   $("sVols").value=s&&s.vols!=null?s.vols:((DB.passages[todayISO()]||{}).nombre||0);
   $("speciesList").innerHTML="";
   if(s&&s.especes&&s.especes.length)s.especes.forEach(addSpeciesRow);else addSpeciesRow({nom:"Palombe",nombre:0,statut:"vue"});
@@ -1211,7 +1255,8 @@ $("btnSaveSession").onclick=()=>{
   let duree=Number($("sDuree").value||0);if(!duree)duree=minutesBetween(debut,fin);
   const s={id:$("editId").value||uid(),date:date,debut:debut,fin:fin,duree:duree,lieu:$("sLieu").value.trim(),km:Number($("sKm").value||0),avec:$("sAvec").value.trim(),
     arme:$("sArme").value,cartouches:Number($("sCart").value||0),espaces:Number($("sEspaces").value||0),notes:$("sNotes").value.trim(),vols:Number($("sVols").value||0),especes:collectSpecies(),
-    titre:$("sTitre").value.trim().slice(0,80),commentaire:$("sComment").value.trim().slice(0,500)};
+    titre:$("sTitre").value.trim().slice(0,80),commentaire:$("sComment").value.trim().slice(0,500),extra:collectExtra()};
+  if(!Object.keys(s.extra).length)delete s.extra;
   const idx=DB.sessions.findIndex(x=>x.id===s.id);
   if(idx>=0){DB.sessions[idx]=s;if(typeof queuePubMaj==="function")queuePubMaj(s.id);}else{DB.sessions.push(s);if(typeof queuePub==="function")queuePub(s.id);}
   DB.sessions.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
@@ -1432,10 +1477,10 @@ function buildXlsx(sheets){
   return zipStore(files);
 }
 function workbookSheets(){
-  const sessions=[["ID","Date","Debut","Fin","Duree_min","Lieu","Avec","Km","Arme","Cartouches","Postes","Vols","Notes","Tues","Vues","Titre","Commentaire"]];
+  const sessions=[["ID","Date","Debut","Fin","Duree_min","Lieu","Avec","Km","Arme","Cartouches","Postes","Vols","Notes","Tues","Vues","Titre","Commentaire","Infos complementaires"]];
   const especes=[["Session_ID","Date","Lieu","Espece","Reference","Nombre","Statut"]];
   DB.sessions.forEach(s=>{
-    sessions.push([s.id,s.date||"",s.debut||"",s.fin||"",Number(s.duree||0),s.lieu||"",s.avec||"",Number(s.km||0),s.arme||"",Number(s.cartouches||0),Number(s.espaces||0),Number(s.vols||0),s.notes||"",countStatut(s,"tuee"),countStatut(s,"vue"),s.titre||"",s.commentaire||""]);
+    sessions.push([s.id,s.date||"",s.debut||"",s.fin||"",Number(s.duree||0),s.lieu||"",s.avec||"",Number(s.km||0),s.arme||"",Number(s.cartouches||0),Number(s.espaces||0),Number(s.vols||0),s.notes||"",countStatut(s,"tuee"),countStatut(s,"vue"),s.titre||"",s.commentaire||"",extraLines(s).map(x=>x.label+" : "+x.val).join(" ; ")]);
     (s.especes||[]).forEach(e=>especes.push([s.id,s.date||"",s.lieu||"",e.nom,e.ref||"",Number(e.nombre||0),STAT_LBL[e.statut]||e.statut||""]));
   });
   const passages=[["Date","Vols","Note"]].concat(Object.keys(DB.passages).sort().map(d=>[d,Number(DB.passages[d].nombre||0),DB.passages[d].note||""]));
@@ -1724,7 +1769,7 @@ function initCloud(){
     if(u)hideGate();else if(ev!=="PASSWORD_RECOVERY")showGate("login");
     if(!changed)return;
     if(u)setTimeout(afterLogin,0);
-    else{PROFIL=null;stopFeed();setSync("out");renderAccount();if(currentView()==="groupe")renderGroupe();}
+    else{PROFIL=null;stopFeed();syncAdminNav();if(currentView()==="param")go("dash");setSync("out");renderAccount();if(currentView()==="groupe")renderGroupe();}
   });
   window.addEventListener("online",()=>{if(USER&&DB.meta.dirty)pushNow();else if(USER)pullIfNewer();});
   window.addEventListener("offline",()=>{if(USER)setSync("offline");});
@@ -1787,6 +1832,7 @@ async function afterLogin(){
       if(pend)toast(pend+" membre(s) en attente de validation — voir l’onglet Groupe");
     }
   }catch(e){setSync("error",errFr(e));}
+  syncAdminNav();loadFormCfg().catch(()=>{});
   renderAccount();rerender();
   startFeed().catch(()=>{});
 }
@@ -2261,6 +2307,7 @@ function mvCard(s){
     '<div class="s-chips">'+(chips||'<span class="chip">Aucune observation</span>')+'</div></div></summary>'+
     '<div class="mv-detail">'+(s.arme?'<div class="kv"><span>Arme</span><strong>'+esc(s.arme)+'</strong></div>':"")+
       (esp?'<div class="kv"><span>Détail</span><strong style="text-align:right">'+esp+'</strong></div>':"")+
+      extraLines(s).map(x=>'<div class="kv"><span>'+esc(x.label)+'</span><strong>'+esc(String(x.val))+'</strong></div>').join("")+
       (s.commentaire?'<p class="mv-notes" style="color:var(--text)">« '+esc(s.commentaire)+' »</p>':"")+
       (s.notes?'<p class="mv-notes">'+esc(s.notes)+'</p>':"")+'</div></details>';
 }
@@ -2625,8 +2672,286 @@ function bindAdminRecomp(){
 $("recRefresh").onclick=()=>renderRecomp();
 $("heroMed").onclick=()=>go("recomp");
 
+/* ================== PARAMÉTRAGE DU FORMULAIRE (admin, pour tout le groupe) ================== */
+const STD_BLOCS=[
+  {id:"pub",nom:"Publication au groupe",champs:[["titre","Nom de la sortie"],["commentaire","Commentaire pour le groupe"]]},
+  {id:"quand",nom:"Quand",champs:[["debut","Heure de début"],["fin","Heure de fin"],["duree","Durée (minutes)"]]},
+  {id:"ou",nom:"Où & avec qui",champs:[["lieu","Lieu"],["avec","Avec qui"],["km","Km marchés"],["espaces","Postes / espaces"]]},
+  {id:"equip",nom:"Équipement & vols",champs:[["arme","Arme"],["cartouches","Cartouches"],["vols","Vols vus"],["notes","Observations"]]},
+  {id:"especes",nom:"Espèces",champs:[]}
+];
+const XF_TYPES=[["texte","Texte court"],["nombre","Nombre"],["ouinon","Oui / non"],["liste","Liste de choix"],["long","Texte long"]];
+const BLOC_ICONES=[["i-list","Liste"],["i-bird","Oiseau"],["i-target","Cible"],["i-pin","Lieu"],["i-cal","Calendrier"],["i-clock","Horloge"],["i-route","Parcours"],["i-flag","Drapeau"],["i-eye","Observation"],["i-users","Équipe"],["i-cross","Arme"],["i-shell","Cartouche"]];
+function formCfgDefaut(){return{v:1,blocs:STD_BLOCS.map(b=>({id:b.id,visible:true,titre:""})),champsMasques:[],
+  especes:{ordre:[],masquees:[],defaut:"Palombe",statut:"vue",rapide:6,ajout:[]},perso:[]};}
+function normCfg(c){
+  const d=formCfgDefaut();c=c&&typeof c==="object"?c:{};
+  const out={v:1,blocs:Array.isArray(c.blocs)?c.blocs.filter(b=>b&&b.id):[],champsMasques:Array.isArray(c.champsMasques)?c.champsMasques:[],
+    especes:Object.assign({},d.especes,c.especes||{}),perso:Array.isArray(c.perso)?c.perso.filter(p=>p&&p.id):[]};
+  ["ordre","masquees","ajout"].forEach(k=>{if(!Array.isArray(out.especes[k]))out.especes[k]=[];});
+  const ids=new Set(out.blocs.map(b=>b.id));
+  STD_BLOCS.forEach(b=>{if(!ids.has(b.id))out.blocs.push({id:b.id,visible:true,titre:""});});
+  out.perso.forEach(p=>{if(!ids.has(p.id)&&!out.blocs.some(b=>b.id===p.id))out.blocs.push({id:p.id,visible:true,titre:""});if(!Array.isArray(p.champs))p.champs=[];});
+  const valid=new Set(STD_BLOCS.map(b=>b.id).concat(out.perso.map(p=>p.id)));
+  out.blocs=out.blocs.filter(b=>valid.has(b.id));
+  return out;
+}
+let FORM_CFG=normCfg((()=>{try{return JSON.parse(sGet("chasseNote.formCfg")||"null");}catch(e){return null;}})());
+function especesGroupe(){return(FORM_CFG.especes.ajout||[]).filter(e=>e&&e.nom);}
+function especesFormulaire(){
+  const all=allEspeces().filter(e=>e.nom!==LIBRE),E=FORM_CFG.especes,hid=new Set(E.masquees||[]);
+  const rank=n=>{const i=(E.ordre||[]).indexOf(n);return i<0?9999:i;};
+  return all.filter(e=>!hid.has(e.nom)).map((e,i)=>({e:e,i:i})).sort((a,b)=>rank(a.e.nom)-rank(b.e.nom)||a.i-b.i).map(x=>x.e);
+}
+async function loadFormCfg(){
+  if(!SB||!USER)return;
+  const r=await SB.from("parametres").select("valeur,maj_le").eq("cle","formulaire").maybeSingle();
+  if(r.error||!r.data)return;
+  FORM_CFG=normCfg(r.data.valeur);
+  sSet("chasseNote.formCfg",JSON.stringify(FORM_CFG));
+  applyFormCfg();
+}
+function xfInput(f,val){
+  const id='data-xf="'+esc(f.id)+'"',v=val==null?"":val;
+  switch(f.type){
+    case"nombre":return'<div class="stepper"><button type="button" class="xmn">−</button><input type="number" '+id+' inputmode="decimal" value="'+esc(v)+'" /><button type="button" class="xpl">+</button></div>';
+    case"ouinon":return'<label class="tog xtog"><input type="checkbox" '+id+(v===true||v==="oui"?" checked":"")+' />Oui</label>';
+    case"liste":return'<select '+id+'><option value="">—</option>'+(f.options||[]).map(o=>'<option'+(o===v?" selected":"")+'>'+esc(o)+'</option>').join("")+'</select>';
+    case"long":return'<textarea '+id+' style="min-height:70px">'+esc(v)+'</textarea>';
+    default:return'<input type="text" '+id+' value="'+esc(v)+'" />';
+  }
+}
+function applyFormCfg(){
+  const box=$("formBlocks");if(!box)return;
+  const C=FORM_CFG;
+  // Blocs personnalisés : (re)création
+  box.querySelectorAll('[data-bloc^="x"]').forEach(el=>{
+    const keep={};el.querySelectorAll("[data-xf]").forEach(i=>{keep[i.dataset.xf]=i.type==="checkbox"?i.checked:i.value;});
+    el._keep=keep;
+  });
+  const old={};box.querySelectorAll('[data-bloc^="x"]').forEach(el=>{Object.assign(old,el._keep||{});el.remove();});
+  C.perso.forEach(p=>{
+    const el=document.createElement("div");el.className="panel";el.dataset.bloc=p.id;
+    el.innerHTML='<div class="panel-head"><h3><span class="ico">'+ico(p.icone||"i-list")+'</span><span class="bt" data-def="'+esc(p.titre||"Bloc")+'">'+esc(p.titre||"Bloc")+'</span></h3></div>'+
+      (p.champs.length?'<div class="fgrid">'+p.champs.map(f=>'<label class="field'+(f.type==="long"||f.type==="texte"?" s2 s2m":"")+'"><span class="n">'+esc(f.label||"Champ")+'</span>'+xfInput(f,old[f.id])+'</label>').join("")+'</div>'
+        :'<div class="hint">Aucun champ dans ce bloc.</div>');
+    el.querySelectorAll(".stepper").forEach(st=>{const i=st.querySelector("input");st.querySelector(".xmn").onclick=()=>{i.value=Math.max(0,Number(i.value||0)-1);};st.querySelector(".xpl").onclick=()=>{i.value=Number(i.value||0)+1;};});
+    box.appendChild(el);
+  });
+  // Ordre, visibilité et titres
+  C.blocs.forEach(b=>{
+    const el=box.querySelector('[data-bloc="'+b.id+'"]');if(!el)return;
+    box.appendChild(el);
+    el.classList.toggle("hidden",b.visible===false);
+    const t=el.querySelector(".bt");if(t)t.textContent=(b.titre||"").trim()||t.dataset.def;
+  });
+  // Champs standards masqués
+  const hid=new Set(C.champsMasques||[]);
+  box.querySelectorAll("[data-champ]").forEach(el=>el.classList.toggle("hidden",hid.has(el.dataset.champ)));
+  // Espèces : menus et accès rapide
+  document.querySelectorAll("#speciesList .sp-nom").forEach(sel=>{const cur=sel.value;sel.innerHTML=speciesOptions(cur);});
+  const n=Math.max(0,Math.min(12,Number(C.especes.rapide||0))),q=$("spQuick");
+  const top=especesFormulaire().slice(0,n);
+  q.classList.toggle("hidden",!top.length);
+  q.innerHTML=top.length?'<span class="n-lbl">Ajout rapide</span><div class="sp-chips">'+top.map(e=>'<button type="button" class="chip" data-quick="'+esc(e.nom)+'">'+ico("i-plus","width:13px;height:13px")+esc(e.nom)+'</button>').join("")+'</div>':"";
+}
+$("spQuick").onclick=e=>{
+  const b=e.target.closest("[data-quick]");if(!b)return;
+  const nom=b.dataset.quick,st=FORM_CFG.especes.statut||"vue";
+  const row=Array.from(document.querySelectorAll("#speciesList .sp-row")).find(r=>r.querySelector(".sp-nom").value===nom&&r.dataset.st===st);
+  if(row){const i=row.querySelector(".sp-nb");i.value=Number(i.value||0)+1;row.classList.add("flash");setTimeout(()=>row.classList.remove("flash"),400);}
+  else addSpeciesRow({nom:nom,nombre:1,statut:st});
+};
+function collectExtra(){
+  const out={};
+  document.querySelectorAll("#formBlocks [data-xf]").forEach(i=>{
+    if(i.closest(".panel.hidden"))return;
+    const v=i.type==="checkbox"?(i.checked?"oui":""):String(i.value||"").trim();
+    if(v!=="")out[i.dataset.xf]=i.type==="number"?Number(v):v;
+  });
+  return out;
+}
+function fillExtra(s){
+  const ex=(s&&s.extra)||{};
+  document.querySelectorAll("#formBlocks [data-xf]").forEach(i=>{
+    const v=ex[i.dataset.xf];
+    if(i.type==="checkbox")i.checked=v==="oui"||v===true;else i.value=v==null?"":v;
+  });
+}
+function xfLabel(fid){for(const p of FORM_CFG.perso)for(const f of p.champs)if(f.id===fid)return f.label;return null;}
+function extraLines(s){
+  const ex=(s&&s.extra)||{};
+  return Object.keys(ex).map(k=>({label:xfLabel(k)||"Info",val:ex[k]})).filter(x=>x.val!==""&&x.val!=null);
+}
+
+/* ---------- Onglet Paramétrage ---------- */
+let PCFG=null,PEDIT=null;
+function isAdminNow(){return!!(PROFIL&&PROFIL.role==="admin"&&PROFIL.statut==="actif");}
+function syncAdminNav(){document.querySelectorAll('[data-view="param"],.admin-only').forEach(b=>b.classList.toggle("hidden",!isAdminNow()));}
+function blocNom(id){const s=STD_BLOCS.find(b=>b.id===id);if(s)return s.nom;const p=PCFG.perso.find(x=>x.id===id);return p?(p.titre||"Bloc"):id;}
+function uidShort(p){return p+Math.random().toString(36).slice(2,8);}
+function renderParam(){
+  const body=$("paramBody");
+  if(!isAdminNow()){body.innerHTML='<div class="panel gate">'+ico("i-lock")+'<h3>Réservé à l’administrateur</h3><p>Seul l’administrateur peut modifier le formulaire de saisie.</p></div>';return;}
+  if(!PCFG)PCFG=JSON.parse(JSON.stringify(FORM_CFG));
+  const C=PCFG,hid=new Set(C.champsMasques);
+  const blocs=C.blocs.map((b,i)=>{
+    const std=STD_BLOCS.find(x=>x.id===b.id),p=C.perso.find(x=>x.id===b.id);
+    const champs=std?std.champs.map(([cid,lab])=>'<label class="tog"><input type="checkbox" data-pchamp="'+cid+'"'+(hid.has(cid)?"":" checked")+' />'+esc(lab)+'</label>').join("")
+      :(p&&p.champs.length?p.champs.map(f=>'<span class="chip">'+esc(f.label)+' · '+esc((XF_TYPES.find(t=>t[0]===f.type)||["",""])[1])+'</span>').join(""):'<span class="hint" style="margin:0">Aucun champ</span>');
+    return'<div class="prow'+(b.visible===false?" off":"")+'" data-i="'+i+'">'+
+      '<div class="pmove"><button class="btn icon sm" data-pb="up" '+(i===0?"disabled":"")+' title="Monter">▲</button><button class="btn icon sm" data-pb="down" '+(i===C.blocs.length-1?"disabled":"")+' title="Descendre">▼</button></div>'+
+      '<div class="pmain"><div class="pline"><input class="ptitle" data-pb="titre" value="'+esc(b.titre||"")+'" placeholder="'+esc(blocNom(b.id))+'" '+(p?"disabled":"")+' />'+
+        (p?'<span class="chip warn">Bloc ajouté</span>':'')+'<label class="tog"><input type="checkbox" data-pb="vis"'+(b.visible===false?"":" checked")+' />Affiché</label></div>'+
+        '<div class="pchamps">'+champs+'</div>'+
+        (p?'<div class="btn-row" style="margin:8px 0 0"><button class="btn sm" data-pb="edit">Modifier le bloc</button><button class="btn sm danger" data-pb="del">Supprimer</button></div>':'')+'</div></div>';
+  }).join("");
+  // Espèces
+  const E=C.especes,hidE=new Set(E.masquees),all=allEspecesParam();
+  const rank=n=>{const i=E.ordre.indexOf(n);return i<0?9999:i;};
+  const sorted=all.map((e,i)=>({e,i})).sort((a,b)=>rank(a.e.nom)-rank(b.e.nom)||a.i-b.i).map(x=>x.e);
+  const nVis=sorted.filter(e=>!hidE.has(e.nom)).length;
+  const sp=sorted.map((e,i)=>'<div class="srow'+(hidE.has(e.nom)?" off":"")+'" data-sp="'+esc(e.nom)+'"><div class="pmove"><button class="btn icon sm" data-ps="up" '+(i===0?"disabled":"")+'>▲</button><button class="btn icon sm" data-ps="down" '+(i===sorted.length-1?"disabled":"")+'>▼</button></div>'+
+    '<div class="sname"><strong>'+esc(e.nom)+'</strong><small>'+esc(e.type||"")+(E.ajout.some(a=>a.nom===e.nom)?" · ajoutée par l’admin":"")+'</small></div>'+
+    '<label class="tog"><input type="checkbox" data-ps="vis"'+(hidE.has(e.nom)?"":" checked")+' />Affichée</label>'+
+    (E.ajout.some(a=>a.nom===e.nom)?'<button class="btn icon sm ghost" data-ps="del" title="Retirer">'+ico("i-trash")+'</button>':'')+'</div>').join("");
+  const visList=sorted.filter(e=>!hidE.has(e.nom));
+  body.innerHTML=
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-list")+'</span>Blocs du formulaire « Nouvelle session »</h3><button class="btn sm ghost" id="pReset">Réinitialiser</button></div>'+
+      '<p class="hint" style="margin-top:0">Changez l’ordre avec ▲ ▼, renommez un bloc, masquez-le ou choisissez ses champs. La date et les espèces saisies restent toujours enregistrées.</p>'+
+      '<div class="plist">'+blocs+'</div></div>'+
+    '<div class="panel" id="pBuilder"><div class="panel-head"><h3><span class="ico">'+ico("i-plus")+'</span>'+(PEDIT&&PEDIT.existe?"Modifier le bloc":"Ajouter un bloc")+'</h3></div>'+builderHTML()+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Espèces proposées</h3><span class="meta">'+nVis+' affichée(s) sur '+sorted.length+'</span></div>'+
+      '<div class="btn-row" style="margin-top:0"><button class="btn sm" data-psort="az">Trier A → Z</button><button class="btn sm" data-psort="type">Oiseaux puis mammifères</button><button class="btn sm" data-psort="top">Les plus prélevées du groupe</button><button class="btn sm ghost" data-psort="all">Tout afficher</button></div>'+
+      '<div class="fgrid" style="margin-top:12px">'+
+        '<label class="field"><span class="n">Espèce par défaut (nouvelle ligne)</span><select id="pDef">'+visList.map(e=>'<option'+(e.nom===E.defaut?" selected":"")+'>'+esc(e.nom)+'</option>').join("")+'</select></label>'+
+        '<label class="field"><span class="n">Sort par défaut</span><select id="pStat">'+STATUTS.map(s=>'<option value="'+s[0]+'"'+(s[0]===E.statut?" selected":"")+'>'+s[1]+'</option>').join("")+'</select></label>'+
+        '<label class="field"><span class="n">Boutons d’ajout rapide</span><select id="pRap">'+[0,3,4,5,6,8,10,12].map(n=>'<option value="'+n+'"'+(n===Number(E.rapide)?" selected":"")+'>'+(n?n+" premières espèces":"Aucun")+'</option>').join("")+'</select></label>'+
+      '</div>'+
+      '<div class="slist">'+sp+'</div>'+
+      '<div class="fgrid" style="margin-top:12px"><label class="field s2 s2m"><span class="n">Ajouter une espèce pour tout le groupe</span><input id="pNewEsp" placeholder="Ex. Vanneau huppé" /></label>'+
+        '<label class="field"><span class="n">Type</span><select id="pNewType"><option>Oiseau</option><option>Mammifère</option><option>Libre</option></select></label>'+
+        '<div class="field" style="align-self:end"><button class="btn" id="pAddEsp">'+ico("i-plus")+'Ajouter</button></div></div></div>'+
+    '<div class="savebar"><div class="grow" id="pHint">Les changements s’appliquent à tous les membres après enregistrement.</div>'+
+      '<button class="btn ghost" id="pCancel">Annuler</button><button class="btn primary" id="pSave">'+ico("i-save")+'Enregistrer pour le groupe</button></div>';
+  bindParam();
+}
+function allEspecesParam(){
+  const base=CATALOGUE.filter(e=>e.nom!==LIBRE).concat(PCFG.especes.ajout||[]).concat(DB.settings.especesCustom||[]);
+  const seen=new Set();return base.filter(e=>e&&e.nom&&!seen.has(e.nom)&&seen.add(e.nom));
+}
+function builderHTML(){
+  if(!PEDIT)PEDIT={existe:false,id:null,titre:"",icone:"i-list",champs:[{id:uidShort("f"),label:"",type:"texte",options:[]}]};
+  const P=PEDIT;
+  return'<div class="fgrid"><label class="field s2 s2m"><span class="n">Titre du bloc</span><input id="bTitre" value="'+esc(P.titre)+'" placeholder="Ex. Météo, Chiens, Battue…" /></label>'+
+    '<label class="field"><span class="n">Icône</span><select id="bIcone">'+BLOC_ICONES.map(([k,l])=>'<option value="'+k+'"'+(k===P.icone?" selected":"")+'>'+l+'</option>').join("")+'</select></label></div>'+
+    '<div class="bfields">'+P.champs.map((f,i)=>'<div class="bfield" data-bf="'+i+'"><input class="bf-lab" value="'+esc(f.label)+'" placeholder="Nom du champ (ex. Vent)" />'+
+      '<select class="bf-type">'+XF_TYPES.map(([k,l])=>'<option value="'+k+'"'+(k===f.type?" selected":"")+'>'+l+'</option>').join("")+'</select>'+
+      '<input class="bf-opt'+(f.type==="liste"?"":" hidden")+'" value="'+esc((f.options||[]).join(", "))+'" placeholder="Choix séparés par des virgules (ex. Nord, Sud, Est, Ouest)" />'+
+      '<button class="btn icon sm ghost" data-bfdel="'+i+'" title="Retirer ce champ">'+ico("i-trash")+'</button></div>').join("")+'</div>'+
+    '<div class="btn-row"><button class="btn sm" id="bAddField">'+ico("i-plus")+'Ajouter un champ</button>'+
+      '<button class="btn gold" id="bSave">'+(P.existe?"Mettre à jour le bloc":"Ajouter ce bloc au formulaire")+'</button>'+(P.existe?'<button class="btn ghost" id="bCancel">Annuler la modification</button>':'')+'</div>';
+}
+function readBuilder(){
+  const P=PEDIT;P.titre=$("bTitre").value;P.icone=$("bIcone").value;
+  document.querySelectorAll("#pBuilder .bfield").forEach(r=>{const f=P.champs[Number(r.dataset.bf)];if(!f)return;
+    f.label=r.querySelector(".bf-lab").value;f.type=r.querySelector(".bf-type").value;
+    f.options=r.querySelector(".bf-opt").value.split(",").map(x=>x.trim()).filter(Boolean);});
+}
+function bindParam(){
+  const C=PCFG,body=$("paramBody");
+  body.querySelectorAll(".prow").forEach(row=>{
+    const i=Number(row.dataset.i),b=C.blocs[i];
+    row.querySelectorAll("[data-pb]").forEach(el=>{
+      const a=el.dataset.pb;
+      if(a==="titre")el.oninput=()=>{b.titre=el.value;};
+      else if(a==="vis")el.onchange=()=>{b.visible=el.checked;renderParam();};
+      else el.onclick=()=>{
+        if(a==="up"&&i>0){C.blocs.splice(i-1,0,C.blocs.splice(i,1)[0]);}
+        if(a==="down"&&i<C.blocs.length-1){C.blocs.splice(i+1,0,C.blocs.splice(i,1)[0]);}
+        if(a==="edit"){const p=C.perso.find(x=>x.id===b.id);PEDIT=JSON.parse(JSON.stringify(p));PEDIT.existe=true;renderParam();$("pBuilder").scrollIntoView({behavior:"smooth"});return;}
+        if(a==="del"){confirmBox("Supprimer ce bloc ?","Le bloc disparaîtra du formulaire. Les valeurs déjà saisies dans les anciennes sorties sont conservées.","Supprimer").then(ok=>{if(!ok)return;C.perso=C.perso.filter(x=>x.id!==b.id);C.blocs.splice(i,1);renderParam();});return;}
+        renderParam();
+      };
+    });
+    row.querySelectorAll("[data-pchamp]").forEach(cb=>cb.onchange=()=>{
+      const k=cb.dataset.pchamp;C.champsMasques=C.champsMasques.filter(x=>x!==k);if(!cb.checked)C.champsMasques.push(k);
+    });
+  });
+  // Constructeur de bloc
+  $("pBuilder").onchange=e=>{if(e.target.classList.contains("bf-type")){readBuilder();renderParamBuilder();}};
+  $("bAddField").onclick=()=>{readBuilder();PEDIT.champs.push({id:uidShort("f"),label:"",type:"texte",options:[]});renderParamBuilder();};
+  $("pBuilder").querySelectorAll("[data-bfdel]").forEach(b=>b.onclick=()=>{readBuilder();PEDIT.champs.splice(Number(b.dataset.bfdel),1);renderParamBuilder();});
+  if($("bCancel"))$("bCancel").onclick=()=>{PEDIT=null;renderParam();};
+  $("bSave").onclick=()=>{
+    readBuilder();const P=PEDIT;
+    const titre=P.titre.trim();if(!titre)return toast("Donnez un titre au bloc");
+    const champs=P.champs.filter(f=>f.label.trim()).map(f=>({id:f.id,label:f.label.trim().slice(0,40),type:f.type,options:f.type==="liste"?f.options.slice(0,20):[]}));
+    if(!champs.length)return toast("Ajoutez au moins un champ avec un nom");
+    if(champs.some(f=>f.type==="liste"&&!f.options.length))return toast("Une liste de choix doit avoir au moins un choix");
+    if(P.existe){const p=C.perso.find(x=>x.id===P.id);Object.assign(p,{titre:titre.slice(0,40),icone:P.icone,champs:champs});}
+    else{const id=uidShort("x");C.perso.push({id:id,titre:titre.slice(0,40),icone:P.icone,champs:champs});C.blocs.push({id:id,visible:true,titre:""});}
+    PEDIT=null;toast(P.existe?"Bloc mis à jour (pensez à enregistrer)":"Bloc ajouté (pensez à enregistrer)");renderParam();
+  };
+  // Espèces
+  const E=C.especes;
+  const curOrder=()=>Array.from(body.querySelectorAll(".srow")).map(r=>r.dataset.sp);
+  body.querySelectorAll(".srow").forEach(r=>{
+    const nom=r.dataset.sp;
+    r.querySelectorAll("[data-ps]").forEach(el=>{
+      const a=el.dataset.ps;
+      if(a==="vis")el.onchange=()=>{E.masquees=E.masquees.filter(x=>x!==nom);if(!el.checked)E.masquees.push(nom);renderParam();};
+      else el.onclick=()=>{
+        const o=curOrder(),i=o.indexOf(nom);
+        if(a==="up"&&i>0)o.splice(i-1,0,o.splice(i,1)[0]);
+        if(a==="down"&&i<o.length-1)o.splice(i+1,0,o.splice(i,1)[0]);
+        if(a==="del"){E.ajout=E.ajout.filter(x=>x.nom!==nom);E.masquees=E.masquees.filter(x=>x!==nom);}
+        E.ordre=a==="del"?o.filter(x=>x!==nom):o;renderParam();
+      };
+    });
+  });
+  body.querySelectorAll("[data-psort]").forEach(b=>b.onclick=async()=>{
+    const k=b.dataset.psort,list=allEspecesParam();
+    if(k==="all"){E.masquees=[];return renderParam();}
+    if(k==="az")E.ordre=list.map(e=>e.nom).sort((a,b)=>a.localeCompare(b,"fr"));
+    if(k==="type"){const t={"Oiseau":0,"Mammifère":1,"Libre":2};E.ordre=list.slice().sort((a,b)=>(t[a.type]??3)-(t[b.type]??3)||a.nom.localeCompare(b.nom,"fr")).map(e=>e.nom);}
+    if(k==="top"){
+      const r=await SB.from("stats_saison").select("especes");const tot={};
+      (r.data||[]).forEach(s=>(s.especes||[]).forEach(e=>{tot[e.nom]=(tot[e.nom]||0)+Number(e.tuee||0);}));
+      DB.sessions.forEach(s=>(s.especes||[]).forEach(e=>{if(e.statut==="tuee"&&!r.data)tot[e.nom]=(tot[e.nom]||0)+Number(e.nombre||0);}));
+      E.ordre=list.map((e,i)=>({n:e.nom,v:tot[e.nom]||0,i})).sort((a,b)=>b.v-a.v||a.i-b.i).map(x=>x.n);
+      toast("Ordre basé sur les pièces prélevées par le groupe");
+    }
+    renderParam();
+  });
+  $("pDef").onchange=e=>{E.defaut=e.target.value;};
+  $("pStat").onchange=e=>{E.statut=e.target.value;};
+  $("pRap").onchange=e=>{E.rapide=Number(e.target.value);};
+  $("pAddEsp").onclick=()=>{
+    const nom=$("pNewEsp").value.trim();if(!nom)return toast("Saisissez le nom de l’espèce");
+    if(allEspecesParam().some(e=>norm(e.nom)===norm(nom)))return toast("Cette espèce existe déjà");
+    E.ajout.push({nom:nom.slice(0,40),ref:"",type:$("pNewType").value});renderParam();
+  };
+  $("pCancel").onclick=()=>{PCFG=null;PEDIT=null;renderParam();toast("Modifications annulées");};
+  $("pReset").onclick=async()=>{
+    if(!(await confirmBox("Revenir au formulaire d’origine ?","Ordre, titres, champs masqués, blocs ajoutés et réglages des espèces seront réinitialisés (après enregistrement).","Réinitialiser")))return;
+    PCFG=formCfgDefaut();PEDIT=null;renderParam();
+  };
+  $("pSave").onclick=async()=>{
+    if(PEDIT&&$("bTitre")&&$("bTitre").value.trim()&&!(await confirmBox("Bloc non ajouté","Le bloc en cours de création n’a pas été ajouté. Enregistrer quand même sans lui ?","Enregistrer")))return;
+    const val=normCfg(JSON.parse(JSON.stringify(PCFG)));
+    $("pSave").disabled=true;
+    const r=await SB.from("parametres").upsert({cle:"formulaire",valeur:val,maj_le:new Date().toISOString(),maj_par:USER.id});
+    $("pSave").disabled=false;
+    if(r.error)return toast(errFr(r.error));
+    FORM_CFG=val;sSet("chasseNote.formCfg",JSON.stringify(val));applyFormCfg();PCFG=null;PEDIT=null;renderParam();
+    toast("Formulaire enregistré pour tout le groupe");
+  };
+}
+function renderParamBuilder(){const box=$("pBuilder");if(!box)return;const head=box.querySelector(".panel-head").outerHTML;box.innerHTML=head+builderHTML();bindParam();}
+
 /* ================== Démarrage ================== */
-applyTheme();prepareForm();renderDash();initCloud();renderAccount();
+applyTheme();applyFormCfg();prepareForm();renderDash();initCloud();renderAccount();
 if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 if(sGet(OLD)&&DB.sessions.length)setImportHint("Ancien Carnet de chasse repris automatiquement : "+DB.sessions.length+" session(s).");
 </script>
