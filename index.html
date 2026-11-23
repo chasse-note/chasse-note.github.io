@@ -74,6 +74,22 @@ nav.tabs button.cta.active{background:var(--brass);color:#1a160c}
   nav.bottom button.cta.active .pill{background:var(--brass);color:#1a160c;outline:3px solid color-mix(in srgb,var(--brass) 35%,transparent)}
 }
 @media (min-width:900px){ nav.bottom{display:none} nav.bottom button .pill{display:contents} }
+/* PC : navigation en colonne à gauche, l'en-tête reste entièrement visible */
+@media (min-width:900px){
+  :root{--side-w:232px}
+  body{padding-left:var(--side-w)}
+  nav.top-nav{position:fixed;left:0;top:0;bottom:0;width:var(--side-w);z-index:35;flex-direction:column;gap:4px;
+    border-radius:0;border:0;border-right:1px solid var(--line);padding:22px 14px;overflow-y:auto;
+    background:color-mix(in srgb,var(--panel) 94%,var(--bg))}
+  nav.top-nav::before{content:"Menu";display:block;padding:4px 12px 12px;color:var(--dim);font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+  nav.top-nav button{justify-content:flex-start;padding:11px 14px;font-size:.95rem;border-radius:12px;position:relative}
+  nav.top-nav button svg{width:20px;height:20px}
+  nav.top-nav button:not(.active):hover{background:color-mix(in srgb,var(--text) 6%,transparent)}
+  nav.top-nav button.cta{margin-bottom:8px;background:color-mix(in srgb,var(--brass) 14%,transparent)}
+  nav.top-nav button[data-view="sheet"]{margin-top:auto}
+  nav.top-nav .nbadge{position:static;margin-left:auto;box-shadow:none}
+  .topbar-in{gap:18px}
+}
 
 /* ---------- Page heads ---------- */
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0 14px}
@@ -522,6 +538,16 @@ body.mv-open{overflow:hidden}
 </svg>
 
 <div class="app">
+  <nav class="tabs top-nav" id="topNav">
+    <button data-view="dash" class="active"><svg class="i"><use href="#i-dash"/></svg>Tableau</button>
+    <button data-view="session" class="cta"><svg class="i"><use href="#i-plus"/></svg>Session</button>
+    <button data-view="histo"><svg class="i"><use href="#i-hist"/></svg>Historique</button>
+    <button data-view="groupe"><svg class="i"><use href="#i-users"/></svg>Groupe</button>
+    <button data-view="recomp"><svg class="i"><use href="#i-trophy"/></svg>Récompenses</button>
+    <button data-view="param" class="hidden"><svg class="i"><use href="#i-set"/></svg>Paramétrage</button>
+    <button data-view="sheet"><svg class="i"><use href="#i-sheet"/></svg>Tableur</button>
+    <button data-view="regl"><svg class="i"><use href="#i-set"/></svg>Réglages</button>
+  </nav>
   <header class="topbar">
     <div class="topbar-in">
       <div class="brand">
@@ -531,16 +557,6 @@ body.mv-open{overflow:hidden}
           <p class="sub" id="brandSub">Carnet de chasse</p>
         </div>
       </div>
-      <nav class="tabs top-nav" id="topNav">
-        <button data-view="dash" class="active"><svg class="i"><use href="#i-dash"/></svg>Tableau</button>
-        <button data-view="session" class="cta"><svg class="i"><use href="#i-plus"/></svg>Session</button>
-        <button data-view="histo"><svg class="i"><use href="#i-hist"/></svg>Historique</button>
-        <button data-view="groupe"><svg class="i"><use href="#i-users"/></svg>Groupe</button>
-        <button data-view="recomp"><svg class="i"><use href="#i-trophy"/></svg>Récompenses</button>
-        <button data-view="param" class="hidden"><svg class="i"><use href="#i-set"/></svg>Paramétrage</button>
-        <button data-view="sheet"><svg class="i"><use href="#i-sheet"/></svg>Tableur</button>
-        <button data-view="regl"><svg class="i"><use href="#i-set"/></svg>Réglages</button>
-      </nav>
       <div class="top-actions">
         <button class="icon-btn" id="topImport" title="Importer Excel / JSON"><svg class="i"><use href="#i-up"/></svg></button>
         <button class="icon-btn" id="topExport" title="Exporter Excel"><svg class="i"><use href="#i-xls"/></svg></button>
