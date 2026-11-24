@@ -523,6 +523,21 @@ td small{display:block;color:var(--dim);font-size:.74rem}
 .bt-cardscore strong{font-size:1.5rem}.bt-cardscore small{color:var(--dim);font-size:.9rem}
 .bt-cardscore span{color:var(--accent);font-weight:600}
 @media (max-width:560px){.bt-card{grid-template-columns:54px minmax(0,1fr) auto}.btshot{min-height:78px;font-size:.98rem}}
+.bt-crits .s-full{grid-column:1/-1}
+.ptabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px;width:fit-content;max-width:100%}
+.ptabs button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:.92rem;padding:9px 16px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.ptabs button svg{width:18px;height:18px}
+.ptabs button.on{background:var(--accent);color:var(--accent-ink)}
+.blist{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.blist-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.blist-h strong{font-size:.95rem}
+.blist-h .meta{color:var(--dim);font-size:.8rem;margin-right:auto}
+.lchip{gap:6px;padding:5px 6px 5px 11px!important;cursor:default!important}
+.lchip button{appearance:none;border:0;background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--muted);width:20px;height:20px;border-radius:50%;cursor:pointer;line-height:1;font-size:.9rem;display:grid;place-items:center}
+.lchip button:hover{background:var(--danger);color:#fff}
+.ladd{display:inline-flex;gap:4px;align-items:center}
+.ladd input{width:150px;padding:6px 10px}
+.ladd .btn{padding:6px 8px}
 .hero-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .med-chip{cursor:pointer;font:inherit;font-size:.82rem;color:var(--brass);border-color:color-mix(in srgb,var(--brass) 50%,transparent);background:color-mix(in srgb,var(--brass) 12%,transparent);gap:6px}
 .med-chip strong{font-family:var(--f-num);font-size:1rem;color:var(--text)}
@@ -850,7 +865,7 @@ td small{display:block;color:var(--dim);font-size:.74rem}
   <!-- =============== PARAMÉTRAGE (admin) =============== -->
   <section id="view-param" class="hidden">
     <div class="page-head">
-      <div><div class="kicker">Administration</div><h2>Paramétrage</h2><p>Personnalisez le formulaire « Nouvelle session » pour tous les membres du groupe.</p></div>
+      <div><div class="kicker">Administration</div><h2>Paramétrage</h2><p>Personnalisez les formulaires « Nouvelle session » et « Ball-trap » pour tous les membres du groupe.</p></div>
       <div class="btn-row" style="margin:0"><button class="btn" data-go="session"><svg class="i"><use href="#i-eye"/></svg>Voir le formulaire</button></div>
     </div>
     <div id="paramBody"></div>
@@ -1567,8 +1582,8 @@ function workbookSheets(){
     {name:"Catalogue",rows:cat,widths:[26,26,12]},
     {name:"Reglages",rows:regl,widths:[16,40]},
     {name:"Resume",rows:resume,widths:[26,16,10,10,10],headRows:headRows},
-    {name:"BallTrap",rows:[["Serie_ID","Date","Discipline","Lieu","Arme","Tir_no","Resultat","Precision","Cartouche","Choke","Distance_m","Poste","Plateau"]].concat(
-      (DB.balltrap||[]).flatMap(se=>(se.tirs||[]).map((t,i)=>[se.id,se.date||"",se.discipline||"",se.lieu||"",se.arme||"",i+1,(BT_RES[t.r]||[t.r])[0],btQLabel(t.q),t.cart||"",t.choke||"",t.dist||"",t.poste||"",t.plateau||""]))),
+    {name:"BallTrap",rows:[["Serie_ID","Date","Discipline","Lieu","Arme","Tir_no","Resultat","Precision","Cartouche","Choke","Distance_m","Poste","Plateau","Autres_criteres"]].concat(
+      (DB.balltrap||[]).flatMap(se=>(se.tirs||[]).map((t,i)=>[se.id,se.date||"",se.discipline||"",se.lieu||"",se.arme||"",i+1,(BT_RES[t.r]||[t.r])[0],btQLabel(t.q),t.cart||"",t.choke||"",t.dist||"",t.poste||"",t.plateau||"",Object.keys(t.x||{}).map(k=>btLabel(k)+" : "+t.x[k]).join(" ; ")]))),
       widths:[16,12,20,22,20,7,16,14,24,12,11,7,12]}
   ];
 }
@@ -1904,7 +1919,7 @@ async function afterLogin(){
       if(pend)toast(pend+" membre(s) en attente de validation — voir l’onglet Groupe");
     }
   }catch(e){setSync("error",errFr(e));}
-  syncAdminNav();loadFormCfg().catch(()=>{});
+  syncAdminNav();loadFormCfg().catch(()=>{});loadBtCfg().catch(()=>{});
   renderAccount();rerender();
   startFeed().catch(()=>{});
 }
@@ -2863,8 +2878,15 @@ function syncAdminNav(){document.querySelectorAll('[data-view="param"],.admin-on
 function blocNom(id){const s=STD_BLOCS.find(b=>b.id===id);if(s)return s.nom;const p=PCFG.perso.find(x=>x.id===id);return p?(p.titre||"Bloc"):id;}
 function uidShort(p){return p+Math.random().toString(36).slice(2,8);}
 function renderParam(){
-  const body=$("paramBody");
-  if(!isAdminNow()){body.innerHTML='<div class="panel gate">'+ico("i-lock")+'<h3>Réservé à l’administrateur</h3><p>Seul l’administrateur peut modifier le formulaire de saisie.</p></div>';return;}
+  const host=$("paramBody");
+  if(!isAdminNow()){host.innerHTML='<div class="panel gate">'+ico("i-lock")+'<h3>Réservé à l’administrateur</h3><p>Seul l’administrateur peut modifier les formulaires du groupe.</p></div>';return;}
+  host.innerHTML='<div class="ptabs" role="tablist"><button class="'+(PTAB==="form"?"on":"")+'" data-ptab="form">'+ico("i-plus")+'Nouvelle session</button><button class="'+(PTAB==="bt"?"on":"")+'" data-ptab="bt">'+ico("i-target")+'Ball-trap</button></div><div id="paramInner"></div>';
+  host.querySelectorAll("[data-ptab]").forEach(b=>b.onclick=()=>{PTAB=b.dataset.ptab;renderParam();});
+  if(PTAB==="bt")return renderParamBT($("paramInner"));
+  renderParamForm();
+}
+function renderParamForm(){
+  const body=$("paramInner");
   if(!PCFG)PCFG=JSON.parse(JSON.stringify(FORM_CFG));
   const C=PCFG,hid=new Set(C.champsMasques);
   const blocs=C.blocs.map((b,i)=>{
@@ -2931,7 +2953,7 @@ function readBuilder(){
     f.options=r.querySelector(".bf-opt").value.split(",").map(x=>x.trim()).filter(Boolean);});
 }
 function bindParam(){
-  const C=PCFG,body=$("paramBody");
+  const C=PCFG,body=$("paramInner");
   body.querySelectorAll(".prow").forEach(row=>{
     const i=Number(row.dataset.i),b=C.blocs[i];
     row.querySelectorAll("[data-pb]").forEach(el=>{
@@ -3023,47 +3045,107 @@ function bindParam(){
 function renderParamBuilder(){const box=$("pBuilder");if(!box)return;const head=box.querySelector(".panel-head").outerHTML;box.innerHTML=head+builderHTML();bindParam();}
 
 /* ================== BALL-TRAP : saisie tir par tir ================== */
-const BT_DISC=["Parcours de chasse","Compak sporting","Fosse olympique","Fosse universelle","DTL","Skeet","Entraînement libre"];
-const BT_CHOKES=["Cylindre","1/4 (IC)","1/2 (M)","3/4 (IM)","Full","Super full"];
-const BT_DIST=[10,15,20,25,30,35,40,45];
-const BT_PLATEAUX=["Standard","Mini","Midi","Battue","Lapin","Fumigène"];
 const BT_RES={c1:["Cassé 1er coup","ok"],c2:["Cassé 2e coup","ok2"],m:["Manqué","ko"]};
-const BT_Q_HIT=[["pulverise","Pulvérisé"],["casse","Cassé"],["ebreche","Ébréché"]];
-const BT_Q_MISS=[["devant","Devant"],["derriere","Derrière"],["dessus","Dessus"],["dessous","Dessous"],["nsp","Je ne sais pas"]];
+const BT_OLDQ={pulverise:"Pulvérisé",casse:"Cassé",ebreche:"Ébréché",devant:"Devant",derriere:"Derrière",dessus:"Dessus",dessous:"Dessous",nsp:"Je ne sais pas"};
+const BT_STD=[["cart","Cartouche"],["choke","Choke"],["dist","Distance du tir"],["poste","Poste"],["plateau","Type de plateau"],["qualif","Précision du résultat"]];
+const BT_LISTES=[["disciplines","Disciplines"],["stands","Stands / lieux"],["cartouches","Cartouches"],["chokes","Chokes"],["distances","Distances (m)"],["plateaux","Types de plateau"],["qhit","Précisions « cassé »"],["qmiss","Précisions « manqué »"]];
+function btCfgDefaut(){return{v:1,
+  criteres:BT_STD.map(([id])=>({id:id,visible:true,label:""})),perso:[],
+  listes:{disciplines:["Parcours de chasse","Compak sporting","Fosse olympique","Fosse universelle","DTL","Skeet","Entraînement libre"],
+    stands:[],cartouches:[],chokes:["Cylindre","1/4 (IC)","1/2 (M)","3/4 (IM)","Full","Super full"],
+    distances:[10,15,20,25,30,35,40,45],plateaux:["Standard","Mini","Midi","Battue","Lapin","Fumigène"],
+    qhit:["Pulvérisé","Cassé","Ébréché"],qmiss:["Devant","Derrière","Dessus","Dessous","Je ne sais pas"]},
+  defauts:{discipline:"Parcours de chasse",objectif:25,choke:"1/2 (M)",dist:25,plateau:"Standard"}};}
+function btNormCfg(c){
+  const d=btCfgDefaut();c=c&&typeof c==="object"?c:{};
+  const o={v:1,criteres:Array.isArray(c.criteres)?c.criteres.filter(x=>x&&x.id):[],perso:Array.isArray(c.perso)?c.perso.filter(x=>x&&x.id):[],
+    listes:Object.assign({},d.listes,c.listes||{}),defauts:Object.assign({},d.defauts,c.defauts||{})};
+  Object.keys(d.listes).forEach(k=>{if(!Array.isArray(o.listes[k]))o.listes[k]=d.listes[k].slice();});
+  o.listes.distances=o.listes.distances.map(Number).filter(n=>n>0);
+  const ids=new Set(o.criteres.map(x=>x.id));
+  BT_STD.forEach(([id])=>{if(!ids.has(id))o.criteres.push({id:id,visible:true,label:""});});
+  o.perso.forEach(p=>{if(!Array.isArray(p.options))p.options=[];if(!o.criteres.some(x=>x.id===p.id))o.criteres.push({id:p.id,visible:true,label:""});});
+  const valid=new Set(BT_STD.map(x=>x[0]).concat(o.perso.map(p=>p.id)));
+  o.criteres=o.criteres.filter(x=>valid.has(x.id));
+  return o;
+}
+let BTC=btNormCfg((()=>{try{return JSON.parse(sGet("chasseNote.btCfg")||"null");}catch(e){return null;}})());
+async function loadBtCfg(){
+  if(!SB||!USER)return;
+  const r=await SB.from("parametres").select("valeur").eq("cle","balltrap").maybeSingle();
+  if(r.error||!r.data)return;
+  BTC=btNormCfg(r.data.valeur);sSet("chasseNote.btCfg",JSON.stringify(BTC));
+  if(currentView()==="trap")renderTrap();
+}
+function btCrit(id){return BTC.criteres.find(x=>x.id===id)||{id:id,visible:true,label:""};}
+function btOn(id){return btCrit(id).visible!==false;}
+function btLabel(id){const c=btCrit(id);if((c.label||"").trim())return c.label.trim();const s=BT_STD.find(x=>x[0]===id);if(s)return s[1];const p=BTC.perso.find(x=>x.id===id);return p?p.label:id;}
+function btPerso(id){return BTC.perso.find(x=>x.id===id);}
 let BT_ID=null;
 function btList(){if(!Array.isArray(DB.balltrap))DB.balltrap=[];return DB.balltrap;}
-function btCfg(){DB.settings.trap=Object.assign({cart:"",choke:"1/2 (M)",dist:25,poste:1,plateau:"Standard",autoPoste:false},DB.settings.trap||{});return DB.settings.trap;}
+function btCfg(){const D=BTC.defauts;DB.settings.trap=Object.assign({cart:"",choke:D.choke,dist:D.dist,poste:1,plateau:D.plateau,x:{}},DB.settings.trap||{});if(!DB.settings.trap.x)DB.settings.trap.x={};return DB.settings.trap;}
 function btSerie(){return btList().find(x=>x.id===BT_ID)||null;}
 function btHit(t){return t.r==="c1"||t.r==="c2";}
 function btScore(tirs){const n=tirs.length,h=tirs.filter(btHit).length;return{n:n,h:h,c2:tirs.filter(t=>t.r==="c2").length,pct:n?Math.round(h/n*100):0};}
-function btQLabel(q){const x=BT_Q_HIT.concat(BT_Q_MISS).find(a=>a[0]===q);return x?x[1]:"";}
-function btCartouches(){
-  const s=new Set();btList().forEach(se=>(se.tirs||[]).forEach(t=>{if(t.cart)s.add(t.cart);}));
-  if(btCfg().cart)s.add(btCfg().cart);return Array.from(s).sort((a,b)=>a.localeCompare(b,"fr"));
-}
-function btGroupBars(tirs,key,fmt,order){
-  const g={};tirs.forEach(t=>{const k=t[key];if(k===""||k==null)return;(g[k]=g[k]||[]).push(t);});
+function btQLabel(q){return q?(BT_OLDQ[q]||q):"";}
+function btUnion(a,b){const out=[],seen=new Set();a.concat(b).forEach(v=>{const k=norm(String(v));if(v!==""&&v!=null&&!seen.has(k)){seen.add(k);out.push(v);}});return out;}
+function btCartouches(){const used=[];btList().forEach(se=>(se.tirs||[]).forEach(t=>{if(t.cart)used.push(t.cart);}));return btUnion(BTC.listes.cartouches,used);}
+function btStands(){return btUnion(BTC.listes.stands,btList().map(s=>s.lieu).filter(Boolean));}
+function btVal(t,id){return id==="cart"||id==="choke"||id==="dist"||id==="poste"||id==="plateau"?t[id]:(t.x||{})[id];}
+function btGroupBars(tirs,getter,fmt,order){
+  const g={};tirs.forEach(t=>{const k=getter(t);if(k===""||k==null)return;(g[k]=g[k]||[]).push(t);});
   let keys=Object.keys(g);
   if(order)keys.sort((a,b)=>order(a)-order(b));else keys.sort((a,b)=>g[b].length-g[a].length);
   if(!keys.length)return'<div class="empty" style="padding:14px">Pas encore de tirs.</div>';
   return'<div class="bt-bars">'+keys.map(k=>{const s=btScore(g[k]);return'<div class="chart-row" title="'+esc((fmt?fmt(k):k)+" : "+s.h+" cassé(s) sur "+s.n+" tir(s)")+'"><div class="chart-label">'+esc(fmt?fmt(k):k)+'</div><div class="chart-track"><span style="width:'+s.pct+'%"></span></div><div class="chart-val">'+s.pct+' %<small> '+s.h+'/'+s.n+'</small></div></div>';}).join("")+'</div>';
 }
 function btStatsPanels(tirs,titre){
-  const misses=tirs.filter(t=>t.r==="m"&&t.q&&t.q!=="nsp"),mc={};misses.forEach(t=>{mc[t.q]=(mc[t.q]||0)+1;});
-  const missTxt=Object.keys(mc).sort((a,b)=>mc[b]-mc[a]).map(k=>btQLabel(k)+" ("+mc[k]+")").join(" · ");
-  // meilleure combinaison cartouche + choke (5 tirs minimum)
-  const combo={};tirs.forEach(t=>{if(!t.cart||!t.choke)return;const k=t.cart+" · "+t.choke;(combo[k]=combo[k]||[]).push(t);});
+  const misses=tirs.filter(t=>t.r==="m"&&t.q&&t.q!=="nsp"&&t.q!=="Je ne sais pas"),mc={};misses.forEach(t=>{const l=btQLabel(t.q);mc[l]=(mc[l]||0)+1;});
+  const missTxt=Object.keys(mc).sort((a,b)=>mc[b]-mc[a]).map(k=>k+" ("+mc[k]+")").join(" · ");
+  const combo={};if(btOn("cart")&&btOn("choke"))tirs.forEach(t=>{if(!t.cart||!t.choke)return;const k=t.cart+" · "+t.choke;(combo[k]=combo[k]||[]).push(t);});
   const best=Object.entries(combo).filter(([k,v])=>v.length>=5).map(([k,v])=>({k,s:btScore(v)})).sort((a,b)=>b.s.pct-a.s.pct||b.s.n-a.s.n)[0];
-  return'<div class="split">'+
-    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-route")+'</span>Réussite par distance</h3><span class="meta">'+esc(titre)+'</span></div>'+btGroupBars(tirs,"dist",k=>k+" m",k=>Number(k))+'</div>'+
-    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Réussite par choke</h3></div>'+btGroupBars(tirs,"choke",null,k=>{const i=BT_CHOKES.indexOf(k);return i<0?99:i;})+'</div>'+
-  '</div>'+
-  '<div class="split">'+
-    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-shell")+'</span>Réussite par cartouche</h3></div>'+btGroupBars(tirs,"cart")+
-      (best?'<div class="hint">Meilleure combinaison : <strong>'+esc(best.k)+'</strong> — '+best.s.pct+' % sur '+best.s.n+' tirs.</div>':'<div class="hint">La meilleure combinaison cartouche + choke s’affiche à partir de 5 tirs.</div>')+'</div>'+
-    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-flag")+'</span>Réussite par type de plateau</h3></div>'+btGroupBars(tirs,"plateau")+
-      (missTxt?'<div class="hint">Tirs manqués : '+esc(missTxt)+'</div>':'')+'</div>'+
-  '</div>';
+  const icons={dist:"i-route",choke:"i-target",cart:"i-shell",plateau:"i-flag",poste:"i-pin"};
+  const panels=[];
+  BTC.criteres.filter(c=>c.visible!==false&&c.id!=="qualif").forEach(c=>{
+    const id=c.id,p=btPerso(id);
+    if(p&&(p.type==="texte"))return;
+    let order=null,fmt=null;
+    if(id==="dist"){fmt=k=>k+" m";order=k=>Number(k);}
+    else if(id==="poste")order=k=>Number(k);
+    else if(id==="choke")order=k=>{const i=BTC.listes.chokes.indexOf(k);return i<0?99:i;};
+    else if(p&&p.type==="nombre")order=k=>Number(k);
+    else if(p&&p.type==="liste")order=k=>{const i=p.options.indexOf(k);return i<0?99:i;};
+    let extra="";
+    if(id==="cart")extra=best?'<div class="hint">Meilleure combinaison : <strong>'+esc(best.k)+'</strong> — '+best.s.pct+' % sur '+best.s.n+' tirs.</div>':(btOn("choke")?'<div class="hint">La meilleure combinaison cartouche + choke s’affiche à partir de 5 tirs.</div>':"");
+    panels.push('<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico(icons[id]||"i-list")+'</span>Réussite par '+esc(btLabel(id).toLowerCase())+'</h3>'+(panels.length===0?'<span class="meta">'+esc(titre)+'</span>':"")+'</div>'+
+      btGroupBars(tirs,t=>btVal(t,id),fmt,order)+extra+'</div>');
+  });
+  if(missTxt)panels.push('<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-x")+'</span>Tirs manqués</h3></div><div class="hint" style="margin:0">'+esc(missTxt)+'</div></div>');
+  let html="";for(let i=0;i<panels.length;i+=2)html+='<div class="split">'+panels[i]+(panels[i+1]||"")+'</div>';
+  return html;
+}
+function btChoiceHTML(id,opts,cur,fmt,allowFree){
+  return'<div class="btchips" data-crit="'+esc(id)+'">'+opts.map(o=>'<button type="button" class="chip'+(String(o)===String(cur)?" on":"")+'" data-v="'+esc(o)+'">'+esc(fmt?fmt(o):o)+'</button>').join("")+
+    (allowFree?'<input type="number" class="btdist" data-free="'+esc(id)+'" min="1" max="200" value="'+esc(cur==null?"":cur)+'" inputmode="numeric" title="Autre valeur" />':"")+'</div>';
+}
+function btSelectHTML(id,opts,cur,autre){
+  const has=opts.some(o=>String(o)===String(cur));
+  return'<select data-sel="'+esc(id)+'"><option value="">—</option>'+opts.map(o=>'<option'+(String(o)===String(cur)?" selected":"")+'>'+esc(o)+'</option>').join("")+
+    (cur&&!has?'<option selected>'+esc(cur)+'</option>':"")+(autre?'<option value="__autre">✎ Autre…</option>':"")+'</select>';
+}
+function btCritField(c,C){
+  const id=c.id,L=BTC.listes,lab=esc(btLabel(id));
+  if(id==="cart")return'<label class="field s2 s2m"><span class="n">'+lab+'</span>'+btSelectHTML("cart",btCartouches(),C.cart,true)+'</label>';
+  if(id==="plateau")return'<label class="field"><span class="n">'+lab+'</span>'+btSelectHTML("plateau",L.plateaux,C.plateau,true)+'</label>';
+  if(id==="poste")return'<div class="field"><span class="n-lbl">'+lab+'</span><div class="stepper"><button type="button" id="btPm">−</button><input type="number" id="btPoste" min="1" value="'+(C.poste||1)+'" inputmode="numeric" /><button type="button" id="btPp">+</button></div></div>';
+  if(id==="choke")return'<div class="field s-full"><span class="n-lbl">'+lab+'</span>'+btChoiceHTML("choke",L.chokes,C.choke)+'</div>';
+  if(id==="dist")return'<div class="field s-full"><span class="n-lbl">'+lab+'</span>'+btChoiceHTML("dist",L.distances,C.dist,k=>k+" m",true)+'</div>';
+  const p=btPerso(id);if(!p)return"";
+  const v=C.x[id];
+  if(p.type==="liste")return'<div class="field s-full"><span class="n-lbl">'+lab+'</span>'+btChoiceHTML(id,p.options,v)+'</div>';
+  if(p.type==="ouinon")return'<div class="field s-full"><span class="n-lbl">'+lab+'</span>'+btChoiceHTML(id,["Oui","Non"],v)+'</div>';
+  if(p.type==="nombre")return'<label class="field"><span class="n">'+lab+'</span><input type="number" data-in="'+esc(id)+'" value="'+esc(v==null?"":v)+'" inputmode="decimal" /></label>';
+  return'<label class="field s2 s2m"><span class="n">'+lab+'</span><input data-in="'+esc(id)+'" value="'+esc(v==null?"":v)+'" /></label>';
 }
 function renderTrap(){
   const body=$("trapBody"),se=btSerie();
@@ -3071,10 +3153,13 @@ function renderTrap(){
   const C=btCfg(),sc=btScore(se.tirs),obj=Math.max(se.objectif||0,se.tirs.length);
   const last=se.tirs[se.tirs.length-1];
   const armes=(DB.settings.armes||[]).map(a=>a.nom).filter(Boolean);
+  const vis=BTC.criteres.filter(c=>c.visible!==false&&c.id!=="qualif");
   const dots=Array.from({length:obj},(_,i)=>{const t=se.tirs[i];return'<span class="btdot'+(t?(t.r==="m"?" ko":t.r==="c2"?" ok2":" ok"):"")+'" title="'+(t?"Tir "+(i+1)+" : "+BT_RES[t.r][0]:"Tir "+(i+1))+'"></span>';}).join("");
+  const cols=vis.map(c=>c.id);
   const rows=se.tirs.map((t,i)=>({t,i})).reverse().map(({t,i})=>'<tr><td class="num">'+(i+1)+'</td><td><span class="btres '+BT_RES[t.r][1]+'">'+BT_RES[t.r][0]+'</span>'+(t.q?'<small>'+esc(btQLabel(t.q))+'</small>':"")+'</td>'+
-    '<td>'+esc(t.cart||"—")+'</td><td>'+esc(t.choke||"—")+'</td><td class="num">'+(t.dist?t.dist+" m":"—")+'</td><td class="num">'+(t.poste||"—")+'</td><td>'+esc(t.plateau||"—")+'</td>'+
+    cols.map(id=>{const v=btVal(t,id);return'<td'+(id==="dist"||id==="poste"?' class="num"':"")+'>'+esc(v===""||v==null?"—":(id==="dist"?v+" m":v))+'</td>';}).join("")+
     '<td><button class="btn icon sm ghost" data-btdel="'+i+'" title="Supprimer ce tir">'+ico("i-trash")+'</button></td></tr>').join("");
+  const qList=last?(btHit(last)?BTC.listes.qhit:BTC.listes.qmiss):[];
   body.innerHTML=
     '<div class="panel bt-score"><div class="bt-score-top"><div><div class="kicker" style="margin:0">'+esc(se.discipline||"Série")+' · '+esc(fmtDateLong(se.date))+'</div>'+
       '<div class="bt-big"><span>'+sc.h+'</span> / '+sc.n+'<em>'+(sc.n?sc.pct+" %":"")+'</em></div>'+
@@ -3082,61 +3167,80 @@ function renderTrap(){
       '<div class="btn-row" style="margin:0"><button class="btn" id="btBack">'+ico("i-hist")+'Mes séries</button></div></div>'+
       '<div class="btdots">'+dots+'</div></div>'+
     '<div class="panel bt-shoot"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Tir n° '+(se.tirs.length+1)+'</h3><span class="meta">Réglages repris à chaque tir</span></div>'+
-      '<div class="fgrid">'+
-        '<label class="field s2 s2m"><span class="n">Cartouche</span><input id="btCart" list="btCartList" value="'+esc(C.cart)+'" placeholder="Ex. Fiocchi 24 g n°7,5" /><datalist id="btCartList">'+btCartouches().map(c=>'<option value="'+esc(c)+'">').join("")+'</datalist></label>'+
-        '<label class="field"><span class="n">Type de plateau</span><select id="btPlat">'+BT_PLATEAUX.map(p=>'<option'+(p===C.plateau?" selected":"")+'>'+p+'</option>').join("")+'</select></label>'+
-        '<div class="field"><span class="n-lbl">Poste</span><div class="stepper"><button type="button" id="btPm">−</button><input type="number" id="btPoste" min="1" value="'+(C.poste||1)+'" inputmode="numeric" /><button type="button" id="btPp">+</button></div></div>'+
-      '</div>'+
-      '<div class="field"><span class="n-lbl">Choke</span><div class="btchips" id="btChokes">'+BT_CHOKES.map(c=>'<button type="button" class="chip'+(c===C.choke?" on":"")+'" data-choke="'+esc(c)+'">'+esc(c)+'</button>').join("")+'</div></div>'+
-      '<div class="field"><span class="n-lbl">Distance du tir</span><div class="btchips" id="btDists">'+BT_DIST.map(d=>'<button type="button" class="chip'+(Number(C.dist)===d?" on":"")+'" data-dist="'+d+'">'+d+' m</button>').join("")+
-        '<input type="number" id="btDist" min="1" max="80" value="'+esc(C.dist)+'" inputmode="numeric" class="btdist" title="Autre distance (m)" /></div></div>'+
+      '<div class="fgrid bt-crits">'+vis.map(c=>btCritField(c,C)).join("")+'</div>'+
       '<div class="btshots"><button class="btshot ok" data-shot="c1">'+ico("i-check")+'<span>Cassé<small>1er coup</small></span></button>'+
         '<button class="btshot ok2" data-shot="c2">'+ico("i-check")+'<span>Cassé<small>2e coup</small></span></button>'+
         '<button class="btshot ko" data-shot="m">'+ico("i-x")+'<span>Manqué<small>plateau entier</small></span></button></div>'+
-      (last?'<div class="btlast"><span>Dernier tir ('+se.tirs.length+') : <strong class="btres '+BT_RES[last.r][1]+'">'+BT_RES[last.r][0]+'</strong> — préciser :</span><div class="btchips">'+
-        (btHit(last)?BT_Q_HIT:BT_Q_MISS).map(([k,l])=>'<button type="button" class="chip'+(last.q===k?" on":"")+'" data-q="'+k+'">'+l+'</button>').join("")+
-        '</div><button class="btn sm ghost" id="btUndo">'+ico("i-trash")+'Annuler ce tir</button></div>':'')+
+      (last?'<div class="btlast"><span>Dernier tir ('+se.tirs.length+') : <strong class="btres '+BT_RES[last.r][1]+'">'+BT_RES[last.r][0]+'</strong>'+(btOn("qualif")&&qList.length?' — préciser :':"")+'</span>'+
+        (btOn("qualif")&&qList.length?'<div class="btchips">'+qList.map(q=>'<button type="button" class="chip'+(btQLabel(last.q)===q?" on":"")+'" data-q="'+esc(q)+'">'+esc(q)+'</button>').join("")+'</div>':"")+
+        '<button class="btn sm ghost" id="btUndo">'+ico("i-trash")+'Annuler ce tir</button></div>':'')+
     '</div>'+
     btStatsPanels(se.tirs,"cette série")+
     '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-list")+'</span>Détail des tirs</h3><span class="meta">'+se.tirs.length+' tir(s)</span></div>'+
-      (rows?'<div class="scroll"><table><thead><tr><th class="num">N°</th><th>Résultat</th><th>Cartouche</th><th>Choke</th><th class="num">Dist.</th><th class="num">Poste</th><th>Plateau</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">Touchez « Cassé » ou « Manqué » pour enregistrer le premier tir.</div>')+'</div>'+
+      (rows?'<div class="scroll"><table><thead><tr><th class="num">N°</th><th>Résultat</th>'+cols.map(id=>'<th'+(id==="dist"||id==="poste"?' class="num"':"")+'>'+esc(btLabel(id))+'</th>').join("")+'<th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">Touchez « Cassé » ou « Manqué » pour enregistrer le premier tir.</div>')+'</div>'+
     '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-set")+'</span>Informations de la série</h3></div>'+
       '<div class="fgrid">'+
         '<label class="field"><span class="n">Date</span><input type="date" id="btDate" value="'+esc(se.date)+'" /></label>'+
-        '<label class="field"><span class="n">Discipline</span><select id="btDisc">'+BT_DISC.map(d=>'<option'+(d===se.discipline?" selected":"")+'>'+d+'</option>').join("")+'</select></label>'+
-        '<label class="field s2 s2m"><span class="n">Stand / lieu</span><input id="btLieu" value="'+esc(se.lieu||"")+'" placeholder="Ex. Ball-trap de Langon" /></label>'+
+        '<label class="field"><span class="n">Discipline</span>'+btSelectHTML("disc",BTC.listes.disciplines,se.discipline,true).replace('data-sel="disc"','id="btDisc"')+'</label>'+
+        '<label class="field s2 s2m"><span class="n">Stand / lieu</span>'+btSelectHTML("lieu",btStands(),se.lieu,true).replace('data-sel="lieu"','id="btLieu"')+'</label>'+
         '<label class="field s2 s2m"><span class="n">Arme</span><select id="btArme"><option value="">Non précisée</option>'+armes.map(a=>'<option'+(a===se.arme?" selected":"")+'>'+esc(a)+'</option>').join("")+'</select></label>'+
         '<label class="field"><span class="n">Plateaux prévus</span><input type="number" id="btObj" min="0" step="5" value="'+(se.objectif||"")+'" inputmode="numeric" /></label>'+
         '<label class="field s2 s2m"><span class="n">Notes</span><input id="btNotes" value="'+esc(se.notes||"")+'" placeholder="Météo, sensations…" /></label>'+
       '</div><div class="btn-row"><button class="btn danger" id="btDelSerie">'+ico("i-trash")+'Supprimer la série</button><button class="btn primary" id="btDone">'+ico("i-check")+'Terminer la série</button></div></div>';
   bindTrap(se);
 }
+async function btAutre(sel,titre){
+  const v=await askInput(titre,"Saisissez la valeur. L’administrateur peut l’ajouter au menu dans Paramétrage → Ball-trap.","text");
+  if(v==null||!v.trim()){return null;}
+  const o=document.createElement("option");o.textContent=v.trim();o.selected=true;sel.insertBefore(o,sel.querySelector('[value="__autre"]'));
+  return v.trim();
+}
 function bindTrap(se){
-  const C=btCfg();
-  const keep=()=>{C.cart=$("btCart").value.trim();C.plateau=$("btPlat").value;C.poste=Math.max(1,Number($("btPoste").value||1));C.dist=Number($("btDist").value||0)||C.dist;};
-  $("btBack").onclick=()=>{keep();save();BT_ID=null;renderTrap();};
-  $("btCart").onchange=()=>{keep();save();};
-  $("btPlat").onchange=()=>{keep();save();};
-  $("btPoste").onchange=()=>{keep();save();};
-  $("btPm").onclick=()=>{$("btPoste").value=Math.max(1,Number($("btPoste").value||1)-1);keep();save();};
-  $("btPp").onclick=()=>{$("btPoste").value=Number($("btPoste").value||1)+1;keep();save();};
-  $("btChokes").onclick=e=>{const b=e.target.closest("[data-choke]");if(!b)return;C.choke=b.dataset.choke;$("btChokes").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));save();};
-  $("btDists").onclick=e=>{const b=e.target.closest("[data-dist]");if(!b)return;C.dist=Number(b.dataset.dist);$("btDist").value=C.dist;$("btDists").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));save();};
-  $("btDist").onchange=()=>{C.dist=Number($("btDist").value||0);$("btDists").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",Number(x.dataset.dist)===C.dist));save();};
-  document.querySelectorAll("#trapBody [data-shot]").forEach(b=>b.onclick=()=>{
-    keep();
-    se.tirs.push({id:uid(),r:b.dataset.shot,q:"",cart:C.cart,choke:C.choke,dist:Number(C.dist)||null,poste:C.poste,plateau:C.plateau,t:new Date().toISOString()});
+  const C=btCfg(),body=$("trapBody");
+  $("btBack").onclick=()=>{save();BT_ID=null;renderTrap();};
+  body.querySelectorAll(".bt-crits [data-sel]").forEach(sel=>sel.onchange=async()=>{
+    const id=sel.dataset.sel;let v=sel.value;
+    if(v==="__autre"){v=await btAutre(sel,btLabel(id));if(v==null){sel.value=C[id]||"";return;}}
+    C[id]=v;save();
+  });
+  body.querySelectorAll(".bt-crits [data-crit]").forEach(box=>box.onclick=e=>{
+    const b=e.target.closest("[data-v]");if(!b)return;const id=box.dataset.crit;
+    let v=b.dataset.v;if(id==="dist")v=Number(v);
+    if(id==="choke"||id==="dist")C[id]=v;else C.x[id]=C.x[id]===v?"":v;
+    box.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",String(x.dataset.v)===String(id==="choke"||id==="dist"?C[id]:C.x[id])));
+    const f=box.querySelector("[data-free]");if(f)f.value=C[id];
+    save();
+  });
+  body.querySelectorAll(".bt-crits [data-free]").forEach(i=>i.onchange=()=>{C.dist=Number(i.value||0)||C.dist;i.closest("[data-crit]").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",Number(x.dataset.v)===C.dist));save();});
+  body.querySelectorAll(".bt-crits [data-in]").forEach(i=>i.onchange=()=>{const p=btPerso(i.dataset.in);C.x[i.dataset.in]=p&&p.type==="nombre"&&i.value!==""?Number(i.value):i.value.trim();save();});
+  if($("btPoste")){
+    const setP=v=>{C.poste=Math.max(1,Number(v||1));$("btPoste").value=C.poste;save();};
+    $("btPoste").onchange=()=>setP($("btPoste").value);
+    $("btPm").onclick=()=>setP(Number($("btPoste").value||1)-1);
+    $("btPp").onclick=()=>setP(Number($("btPoste").value||1)+1);
+  }
+  body.querySelectorAll("[data-shot]").forEach(b=>b.onclick=()=>{
+    const t={id:uid(),r:b.dataset.shot,q:"",t:new Date().toISOString()};
+    if(btOn("cart"))t.cart=C.cart||"";if(btOn("choke"))t.choke=C.choke||"";if(btOn("dist"))t.dist=Number(C.dist)||null;
+    if(btOn("poste"))t.poste=C.poste;if(btOn("plateau"))t.plateau=C.plateau||"";
+    const x={};BTC.perso.forEach(p=>{if(btOn(p.id)&&C.x[p.id]!==""&&C.x[p.id]!=null)x[p.id]=C.x[p.id];});
+    if(Object.keys(x).length)t.x=x;
+    se.tirs.push(t);
     if(navigator.vibrate)try{navigator.vibrate(b.dataset.shot==="m"?[40,40,40]:30);}catch(e){}
     save();renderTrap();
   });
-  document.querySelectorAll("#trapBody [data-q]").forEach(b=>b.onclick=()=>{const t=se.tirs[se.tirs.length-1];if(!t)return;t.q=t.q===b.dataset.q?"":b.dataset.q;save();renderTrap();});
+  body.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{const t=se.tirs[se.tirs.length-1];if(!t)return;t.q=btQLabel(t.q)===b.dataset.q?"":b.dataset.q;save();renderTrap();});
   if($("btUndo"))$("btUndo").onclick=()=>{se.tirs.pop();save();renderTrap();toast("Dernier tir annulé");};
-  document.querySelectorAll("#trapBody [data-btdel]").forEach(b=>b.onclick=async()=>{
+  body.querySelectorAll("[data-btdel]").forEach(b=>b.onclick=async()=>{
     const i=Number(b.dataset.btdel);if(!(await confirmBox("Supprimer le tir n° "+(i+1)+" ?","Les tirs suivants seront renumérotés.","Supprimer")))return;
     se.tirs.splice(i,1);save();renderTrap();
   });
-  const meta=()=>{se.date=$("btDate").value||se.date;se.discipline=$("btDisc").value;se.lieu=$("btLieu").value.trim();se.arme=$("btArme").value;se.objectif=Number($("btObj").value||0);se.notes=$("btNotes").value.trim();save();};
-  ["btDate","btDisc","btLieu","btArme","btObj","btNotes"].forEach(id=>$(id).onchange=()=>{meta();if(id==="btObj"||id==="btDisc"||id==="btDate")renderTrap();});
+  const meta=()=>{se.date=$("btDate").value||se.date;se.discipline=$("btDisc").value;se.lieu=$("btLieu").value;se.arme=$("btArme").value;se.objectif=Number($("btObj").value||0);se.notes=$("btNotes").value.trim();save();};
+  ["btDate","btArme","btObj","btNotes"].forEach(id=>$(id).onchange=()=>{meta();if(id==="btObj"||id==="btDate")renderTrap();});
+  ["btDisc","btLieu"].forEach(id=>$(id).onchange=async()=>{
+    const sel=$(id);if(sel.value==="__autre"){const v=await btAutre(sel,id==="btDisc"?"Discipline":"Stand / lieu");if(v==null){sel.value=(id==="btDisc"?se.discipline:se.lieu)||"";return;}}
+    meta();if(id==="btDisc")renderTrap();
+  });
   $("btDone").onclick=()=>{meta();BT_ID=null;renderTrap();const s=btScore(se.tirs);toast("Série enregistrée : "+s.h+" / "+s.n);};
   $("btDelSerie").onclick=async()=>{
     if(!(await confirmBox("Supprimer cette série ?",se.tirs.length+" tir(s) seront supprimés. Cette action est définitive.","Supprimer")))return;
@@ -3158,7 +3262,7 @@ function renderTrapList(body){
       tile("Séries","i-hist",list.length,list[0]?"dernière le "+fmtDateLong(list[0].date):"aucune pour l’instant")+
       tile("Meilleure série","i-trophy",best?best.sc.pct+" %":"—",best?best.sc.h+"/"+best.sc.n+" · "+fmtDateLong(best.s.date):"à partir de 10 tirs")+'</div>'+
     '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-hist")+'</span>Mes séries</h3><button class="btn gold" id="btNew2">'+ico("i-plus")+'Nouvelle série</button></div>'+
-      (cards?'<div class="bt-list">'+cards+'</div>':'<div class="empty">'+ico("i-target")+'Aucune série enregistrée. Commencez une série pour saisir chaque tir : résultat, cartouche, choke et distance.</div>')+'</div>'+
+      (cards?'<div class="bt-list">'+cards+'</div>':'<div class="empty">'+ico("i-target")+'Aucune série enregistrée. Commencez une série pour saisir chaque tir.</div>')+'</div>'+
     (all.length?btStatsPanels(all,"toutes séries"):"");
   $("btNew2").onclick=newTrapSerie;
   body.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{BT_ID=b.dataset.open;renderTrap();window.scrollTo({top:0,behavior:"smooth"});});
@@ -3166,10 +3270,118 @@ function renderTrapList(body){
 function newTrapSerie(){
   const prev=btList().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
   const arme=(DB.settings.armes||[]).find(a=>a.principale)||(DB.settings.armes||[])[0];
-  const s={id:uid(),date:todayISO(),discipline:prev?prev.discipline:"Parcours de chasse",lieu:prev?prev.lieu:"",arme:prev?prev.arme:(arme?arme.nom:""),objectif:25,notes:"",tirs:[]};
+  const D=BTC.defauts;
+  const s={id:uid(),date:todayISO(),discipline:prev?prev.discipline:D.discipline,lieu:prev?prev.lieu:"",arme:prev?prev.arme:(arme?arme.nom:""),objectif:Number(D.objectif)||25,notes:"",tirs:[]};
   btList().push(s);BT_ID=s.id;btCfg().poste=1;save();go("trap");window.scrollTo({top:0});
 }
 $("btNew").onclick=newTrapSerie;
+
+/* ---------- Paramétrage Ball-trap (admin) ---------- */
+let PBT=null,PBTEDIT=null,PTAB="form";
+function renderParamBT(body){
+  if(!PBT)PBT=JSON.parse(JSON.stringify(BTC));
+  const P=PBT;
+  const crit=P.criteres.map((c,i)=>{const p=P.perso.find(x=>x.id===c.id),std=BT_STD.find(x=>x[0]===c.id);
+    const def=std?std[1]:(p?p.label:c.id);
+    const info=p?(p.type==="liste"?"Liste : "+p.options.join(", "):({nombre:"Nombre",texte:"Texte libre",ouinon:"Oui / non"})[p.type]):({cart:"Menu « Cartouches »",choke:"Menu « Chokes »",dist:"Menu « Distances »",poste:"Numéro de poste",plateau:"Menu « Types de plateau »",qualif:"Menus « Précisions cassé / manqué »"})[c.id];
+    return'<div class="prow'+(c.visible===false?" off":"")+'" data-ci="'+i+'"><div class="pmove"><button class="btn icon sm" data-pc="up" '+(i===0?"disabled":"")+'>▲</button><button class="btn icon sm" data-pc="down" '+(i===P.criteres.length-1?"disabled":"")+'>▼</button></div>'+
+      '<div class="pmain"><div class="pline"><input class="ptitle" data-pc="label" value="'+esc(std?(c.label||""):(p?p.label:""))+'" placeholder="'+esc(def)+'" />'+(p?'<span class="chip warn">Ajouté</span>':'')+
+      '<label class="tog"><input type="checkbox" data-pc="vis"'+(c.visible===false?"":" checked")+' />Affiché</label></div><div class="hint" style="margin:6px 0 0">'+esc(info||"")+'</div>'+
+      (p?'<div class="btn-row" style="margin:8px 0 0"><button class="btn sm" data-pc="edit">Modifier</button><button class="btn sm danger" data-pc="del">Supprimer</button></div>':'')+'</div></div>';}).join("");
+  const E=PBTEDIT||(PBTEDIT={existe:false,id:null,label:"",type:"liste",options:[]});
+  const listes=BT_LISTES.map(([k,l])=>'<div class="blist" data-lk="'+k+'"><div class="blist-h"><strong>'+esc(l)+'</strong><span class="meta">'+P.listes[k].length+'</span>'+
+      '<button class="btn sm ghost" data-la="sort">A → Z</button>'+(k==="cartouches"||k==="stands"?'<button class="btn sm ghost" data-la="import">Reprendre les valeurs utilisées</button>':'')+'</div>'+
+    '<div class="btchips">'+P.listes[k].map((v,i)=>'<span class="chip lchip">'+esc(k==="distances"?v+" m":v)+'<button type="button" data-ldel="'+i+'" title="Retirer">×</button></span>').join("")+
+      '<span class="ladd"><input data-lin="'+k+'" '+(k==="distances"?'type="number" min="1" inputmode="numeric" placeholder="Ajouter (m)"':'placeholder="Ajouter…"')+' /><button class="btn sm" data-la="add">'+ico("i-plus")+'</button></span></div></div>').join("");
+  const D=P.defauts;
+  body.innerHTML=
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Critères saisis à chaque tir</h3><button class="btn sm ghost" id="pbReset">Réinitialiser</button></div>'+
+      '<p class="hint" style="margin-top:0">Ordre (▲ ▼), nom affiché et affichage de chaque critère. Les anciens tirs gardent leurs valeurs.</p><div class="plist">'+crit+'</div>'+
+      '<h4 class="rc-h">'+(E.existe?"Modifier le critère":"Ajouter un critère")+'</h4>'+
+      '<div class="bfield"><input class="bf-lab" id="pbLab" value="'+esc(E.label)+'" placeholder="Nom (ex. Vent, Lunettes, Position de départ)" />'+
+        '<select class="bf-type" id="pbType">'+[["liste","Liste de choix"],["ouinon","Oui / non"],["nombre","Nombre"],["texte","Texte libre"]].map(([k,l])=>'<option value="'+k+'"'+(k===E.type?" selected":"")+'>'+l+'</option>').join("")+'</select>'+
+        '<span></span><input class="bf-opt'+(E.type==="liste"?"":" hidden")+'" id="pbOpt" value="'+esc(E.options.join(", "))+'" placeholder="Choix séparés par des virgules (ex. Nul, Faible, Moyen, Fort)" /></div>'+
+      '<div class="btn-row"><button class="btn gold" id="pbAdd">'+(E.existe?"Mettre à jour":"Ajouter ce critère")+'</button>'+(E.existe?'<button class="btn ghost" id="pbCancelEdit">Annuler</button>':'')+'</div></div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-list")+'</span>Menus déroulants</h3></div>'+
+      '<p class="hint" style="margin-top:0">Ces listes pré-remplissent les menus et les boutons de l’onglet Ball-trap pour tous les membres.</p>'+listes+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-set")+'</span>Valeurs par défaut d’une nouvelle série</h3></div><div class="fgrid">'+
+      '<label class="field s2 s2m"><span class="n">Discipline</span><select id="pbDisc">'+P.listes.disciplines.map(d=>'<option'+(d===D.discipline?" selected":"")+'>'+esc(d)+'</option>').join("")+'</select></label>'+
+      '<label class="field"><span class="n">Plateaux prévus</span><input type="number" id="pbObj" min="0" step="5" value="'+esc(D.objectif)+'" /></label>'+
+      '<label class="field"><span class="n">Choke</span><select id="pbChoke">'+P.listes.chokes.map(d=>'<option'+(d===D.choke?" selected":"")+'>'+esc(d)+'</option>').join("")+'</select></label>'+
+      '<label class="field"><span class="n">Distance (m)</span><select id="pbDist">'+P.listes.distances.map(d=>'<option'+(Number(d)===Number(D.dist)?" selected":"")+'>'+d+'</option>').join("")+'</select></label>'+
+      '<label class="field"><span class="n">Type de plateau</span><select id="pbPlat">'+P.listes.plateaux.map(d=>'<option'+(d===D.plateau?" selected":"")+'>'+esc(d)+'</option>').join("")+'</select></label>'+
+    '</div></div>'+
+    '<div class="savebar"><div class="grow">Les changements s’appliquent à tous les membres après enregistrement.</div><button class="btn ghost" id="pbCancel">Annuler</button><button class="btn primary" id="pbSave">'+ico("i-save")+'Enregistrer pour le groupe</button></div>';
+  bindParamBT(body);
+}
+function bindParamBT(body){
+  const P=PBT,re=()=>renderParam();
+  body.querySelectorAll(".prow[data-ci]").forEach(row=>{
+    const i=Number(row.dataset.ci),c=P.criteres[i],p=P.perso.find(x=>x.id===c.id);
+    row.querySelectorAll("[data-pc]").forEach(el=>{
+      const a=el.dataset.pc;
+      if(a==="label")el.oninput=()=>{if(p)p.label=el.value;else c.label=el.value;};
+      else if(a==="vis")el.onchange=()=>{c.visible=el.checked;re();};
+      else el.onclick=async()=>{
+        if(a==="up"&&i>0)P.criteres.splice(i-1,0,P.criteres.splice(i,1)[0]);
+        if(a==="down"&&i<P.criteres.length-1)P.criteres.splice(i+1,0,P.criteres.splice(i,1)[0]);
+        if(a==="edit"){PBTEDIT=Object.assign(JSON.parse(JSON.stringify(p)),{existe:true});}
+        if(a==="del"){if(!(await confirmBox("Supprimer « "+p.label+" » ?","Le critère ne sera plus proposé. Les valeurs déjà saisies restent dans les anciens tirs.","Supprimer")))return;
+          P.perso=P.perso.filter(x=>x.id!==c.id);P.criteres.splice(i,1);}
+        re();
+      };
+    });
+  });
+  $("pbType").onchange=()=>{$("pbOpt").classList.toggle("hidden",$("pbType").value!=="liste");};
+  if($("pbCancelEdit"))$("pbCancelEdit").onclick=()=>{PBTEDIT=null;re();};
+  $("pbAdd").onclick=()=>{
+    const label=$("pbLab").value.trim().slice(0,40),type=$("pbType").value,options=$("pbOpt").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,30);
+    if(!label)return toast("Donnez un nom au critère");
+    if(type==="liste"&&!options.length)return toast("Ajoutez au moins un choix à la liste");
+    const E=PBTEDIT;
+    if(E&&E.existe){const p=P.perso.find(x=>x.id===E.id);Object.assign(p,{label,type,options:type==="liste"?options:[]});}
+    else{const id=uidShort("c");P.perso.push({id,label,type,options:type==="liste"?options:[]});P.criteres.push({id,visible:true,label:""});}
+    PBTEDIT=null;toast("Critère enregistré (pensez à enregistrer pour le groupe)");re();
+  };
+  body.querySelectorAll(".blist").forEach(box=>{
+    const k=box.dataset.lk,L=P.listes;
+    const add=()=>{const i=box.querySelector("[data-lin]");let v=i.value.trim();if(!v)return;
+      if(k==="distances"){v=Number(v);if(!(v>0))return toast("Distance invalide");}
+      if(L[k].some(x=>norm(String(x))===norm(String(v))))return toast("Déjà dans la liste");
+      L[k].push(v);if(k==="distances")L[k].sort((a,b)=>a-b);re();
+      setTimeout(()=>{const n=document.querySelector('.blist[data-lk="'+k+'"] [data-lin]');if(n)n.focus();},30);};
+    box.querySelector('[data-la="add"]').onclick=add;
+    box.querySelector("[data-lin]").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();add();}};
+    box.querySelectorAll("[data-ldel]").forEach(b=>b.onclick=()=>{L[k].splice(Number(b.dataset.ldel),1);re();});
+    box.querySelector('[data-la="sort"]').onclick=()=>{if(k==="distances")L[k].sort((a,b)=>a-b);else L[k].sort((a,b)=>String(a).localeCompare(String(b),"fr"));re();};
+    const imp=box.querySelector('[data-la="import"]');
+    if(imp)imp.onclick=async()=>{
+      const vals=[];
+      const scan=d=>((d&&d.balltrap)||[]).forEach(se=>{if(k==="stands"&&se.lieu)vals.push(se.lieu);if(k==="cartouches")(se.tirs||[]).forEach(t=>{if(t.cart)vals.push(t.cart);});});
+      scan(DB);
+      const r=await SB.from("carnets").select("data");(r.data||[]).forEach(x=>scan(x.data));
+      const before=L[k].length;L[k]=btUnion(L[k],vals);
+      toast((L[k].length-before)+" valeur(s) ajoutée(s) depuis les séries du groupe");re();
+    };
+  });
+  const D=P.defauts;
+  $("pbDisc").onchange=e=>{D.discipline=e.target.value;};
+  $("pbObj").onchange=e=>{D.objectif=Number(e.target.value||0);};
+  $("pbChoke").onchange=e=>{D.choke=e.target.value;};
+  $("pbDist").onchange=e=>{D.dist=Number(e.target.value);};
+  $("pbPlat").onchange=e=>{D.plateau=e.target.value;};
+  $("pbReset").onclick=async()=>{if(!(await confirmBox("Réinitialiser le ball-trap ?","Critères, menus et valeurs par défaut reviennent à l’origine (après enregistrement).","Réinitialiser")))return;PBT=btCfgDefaut();PBTEDIT=null;re();};
+  $("pbCancel").onclick=()=>{PBT=null;PBTEDIT=null;re();toast("Modifications annulées");};
+  $("pbSave").onclick=async()=>{
+    const val=btNormCfg(JSON.parse(JSON.stringify(PBT)));
+    $("pbSave").disabled=true;
+    const r=await SB.from("parametres").upsert({cle:"balltrap",valeur:val,maj_le:new Date().toISOString(),maj_par:USER.id});
+    $("pbSave").disabled=false;
+    if(r.error)return toast(errFr(r.error));
+    BTC=val;sSet("chasseNote.btCfg",JSON.stringify(val));PBT=null;PBTEDIT=null;re();
+    toast("Paramètres du ball-trap enregistrés pour le groupe");
+  };
+}
 
 /* ================== Démarrage ================== */
 applyTheme();applyFormCfg();prepareForm();renderDash();initCloud();renderAccount();
