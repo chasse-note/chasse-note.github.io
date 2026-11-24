@@ -61,13 +61,13 @@ nav.tabs button.cta{color:var(--brass)}
 nav.tabs button.cta.active{background:var(--brass);color:#1a160c}
 @media (max-width:899px){
   nav.top-nav{display:none}
-  nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);
+  nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(6,1fr);
     height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 6px env(safe-area-inset-bottom);
     background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border-top:1px solid var(--line);border-radius:0;gap:0}
   nav.bottom button{flex-direction:column;justify-content:center;gap:3px;padding:4px 2px;font-size:.68rem;letter-spacing:.02em;border-radius:12px;background:transparent!important;color:var(--dim)}
   nav.bottom button svg{width:22px;height:22px}
-  nav.bottom button .pill{display:grid;place-items:center;width:52px;height:30px;border-radius:15px;transition:background .15s}
+  nav.bottom button .pill{display:grid;place-items:center;width:44px;height:30px;border-radius:15px;transition:background .15s}
   nav.bottom button.active{color:var(--text)}
   nav.bottom button.active .pill{background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--accent)}
   nav.bottom button.cta .pill{background:var(--brass);color:#1a160c;width:46px;height:46px;border-radius:16px;margin-top:-20px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
@@ -486,6 +486,43 @@ body.mv-open{overflow:hidden}
 .bfield .bf-opt{grid-column:1/3}
 @media (max-width:560px){.bfield{grid-template-columns:1fr auto}.bfield .bf-type{grid-column:1}.bfield .bf-opt{grid-column:1/-1}}
 .mv-extra{margin-top:8px}
+
+/* ---------- Ball-trap ---------- */
+.bt-score-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.bt-big{font-family:var(--f-num);font-size:2.6rem;font-weight:700;line-height:1.1;margin:6px 0 2px;color:var(--muted)}
+.bt-big span{color:var(--text);font-size:3.4rem}
+.bt-big em{font-style:normal;font-size:1.2rem;color:var(--accent);margin-left:12px}
+.btdots{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.btdot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line);background:transparent}
+.btdot.ok{background:var(--tuee);border-color:var(--tuee)}
+.btdot.ok2{background:color-mix(in srgb,var(--tuee) 45%,transparent);border-color:var(--tuee)}
+.btdot.ko{background:var(--danger);border-color:var(--danger)}
+.btdots.sm{gap:3px;margin-top:6px}.btdots.sm .btdot{width:8px;height:8px;border-width:1px}
+.btchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.btchips .chip{cursor:pointer;font:inherit;font-size:.86rem;padding:7px 12px}
+.btchips .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btdist{width:84px!important;padding:7px 10px!important}
+.btshots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+.btshot{appearance:none;border:0;border-radius:16px;min-height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font:inherit;font-weight:700;font-size:1.05rem;transition:transform .08s}
+.btshot:active{transform:scale(.96)}
+.btshot svg{width:26px;height:26px;stroke-width:2.6}
+.btshot span{display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.btshot small{font-weight:500;font-size:.74rem;opacity:.85;margin-top:2px}
+.btshot.ok{background:var(--tuee);color:#0f140b}
+.btshot.ok2{background:color-mix(in srgb,var(--tuee) 35%,var(--field));color:var(--text);border:1.5px solid var(--tuee)}
+.btshot.ko{background:var(--danger);color:#fff}
+.btlast{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.btlast .btchips{margin:0}
+.btres{font-weight:600}.btres.ok{color:var(--tuee)}.btres.ok2{color:color-mix(in srgb,var(--tuee) 70%,var(--text))}.btres.ko{color:var(--danger)}
+td small{display:block;color:var(--dim);font-size:.74rem}
+.bt-bars .chart-row{grid-template-columns:minmax(80px,34%) 1fr 92px}
+.bt-bars .chart-val small{color:var(--dim);font-weight:500;font-size:.74rem}
+.bt-card{width:100%;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.bt-card:hover{border-color:var(--accent)}
+.bt-cardscore{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--f-num)}
+.bt-cardscore strong{font-size:1.5rem}.bt-cardscore small{color:var(--dim);font-size:.9rem}
+.bt-cardscore span{color:var(--accent);font-weight:600}
+@media (max-width:560px){.bt-card{grid-template-columns:54px minmax(0,1fr) auto}.btshot{min-height:78px;font-size:.98rem}}
 .hero-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .med-chip{cursor:pointer;font:inherit;font-size:.82rem;color:var(--brass);border-color:color-mix(in srgb,var(--brass) 50%,transparent);background:color-mix(in srgb,var(--brass) 12%,transparent);gap:6px}
 .med-chip strong{font-family:var(--f-num);font-size:1rem;color:var(--text)}
@@ -529,6 +566,7 @@ body.mv-open{overflow:hidden}
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
   <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
   <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4.3L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.7 4.3L21 15"/><path d="M21 20v-5h-5"/></symbol>
@@ -544,6 +582,7 @@ body.mv-open{overflow:hidden}
     <button data-view="histo"><svg class="i"><use href="#i-hist"/></svg>Historique</button>
     <button data-view="groupe"><svg class="i"><use href="#i-users"/></svg>Groupe</button>
     <button data-view="recomp"><svg class="i"><use href="#i-trophy"/></svg>Récompenses</button>
+    <button data-view="trap"><svg class="i"><use href="#i-target"/></svg>Ball-trap</button>
     <button data-view="param" class="hidden"><svg class="i"><use href="#i-set"/></svg>Paramétrage</button>
     <button data-view="sheet"><svg class="i"><use href="#i-sheet"/></svg>Tableur</button>
     <button data-view="regl"><svg class="i"><use href="#i-set"/></svg>Réglages</button>
@@ -799,6 +838,15 @@ body.mv-open{overflow:hidden}
     <div id="recBody"></div>
   </section>
 
+  <!-- =============== BALL-TRAP =============== -->
+  <section id="view-trap" class="hidden">
+    <div class="page-head">
+      <div><div class="kicker">Tir sportif</div><h2>Ball-trap</h2><p>Saisissez chaque tir : résultat, cartouche, choke et distance.</p></div>
+      <div class="btn-row" style="margin:0"><button class="btn gold" id="btNew"><svg class="i"><use href="#i-plus"/></svg>Nouvelle série</button></div>
+    </div>
+    <div id="trapBody"></div>
+  </section>
+
   <!-- =============== PARAMÉTRAGE (admin) =============== -->
   <section id="view-param" class="hidden">
     <div class="page-head">
@@ -901,6 +949,7 @@ body.mv-open{overflow:hidden}
   <button data-view="session" class="cta"><span class="pill"><svg class="i"><use href="#i-plus"/></svg></span>Session</button>
   <button data-view="groupe"><span class="pill"><svg class="i"><use href="#i-users"/></svg></span>Groupe</button>
   <button data-view="recomp"><span class="pill"><svg class="i"><use href="#i-trophy"/></svg></span>Médailles</button>
+  <button data-view="trap"><span class="pill"><svg class="i"><use href="#i-target"/></svg></span>Ball-trap</button>
 </nav>
 
 <div class="member-view hidden" id="memberView" role="dialog" aria-modal="true" aria-labelledby="mvName">
@@ -967,7 +1016,7 @@ function sGet(k){try{return localStorage.getItem(k);}catch(e){return MEM[k]||nul
 function sSet(k,v){try{localStorage.setItem(k,v);}catch(e){MEM[k]=v;}}
 function saisonParDefaut(){const n=new Date();const y=n.getMonth()>=8?n.getFullYear():n.getFullYear()-1;return y+"-09-01";}
 function themeDefaut(){const p=PRESETS[0];return{bg:p.bg,panel:p.panel,accent:p.accent,text:p.text};}
-function etatInitial(){return{settings:{nom:"",commune:"",saisonDebut:saisonParDefaut(),armes:[],especesCustom:[],indicateurs:INDIC.map(x=>x[0]),theme:themeDefaut()},sessions:[],passages:{},meta:metaDefaut()};}
+function etatInitial(){return{settings:{nom:"",commune:"",saisonDebut:saisonParDefaut(),armes:[],especesCustom:[],indicateurs:INDIC.map(x=>x[0]),theme:themeDefaut()},sessions:[],passages:{},balltrap:[],meta:metaDefaut()};}
 function metaDefaut(){return{owner:null,dirty:false,maj:0,cloud:null};}
 function uid(){return"s_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function migrate(data){
@@ -986,7 +1035,8 @@ function migrate(data){
   }
   const sessions=(Array.isArray(data.sessions)?data.sessions:[]).map(x=>Object.assign({},x,{id:x.id||uid(),especes:Array.isArray(x.especes)?x.especes:[]}));
   sessions.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  return{settings:s,sessions:sessions,passages:data.passages&&typeof data.passages==="object"?data.passages:{},meta:Object.assign(metaDefaut(),data.meta||{})};
+  const balltrap=(Array.isArray(data.balltrap)?data.balltrap:[]).filter(x=>x&&x.id).map(x=>Object.assign({},x,{tirs:Array.isArray(x.tirs)?x.tirs:[]}));
+  return{settings:s,sessions:sessions,passages:data.passages&&typeof data.passages==="object"?data.passages:{},balltrap:balltrap,meta:Object.assign(metaDefaut(),data.meta||{})};
 }
 function load(){
   try{
@@ -1091,7 +1141,7 @@ function computeStats(list,season){
 }
 
 /* ================== Navigation ================== */
-const VIEWS=["dash","session","histo","groupe","recomp","param","sheet","regl"];
+const VIEWS=["dash","session","histo","groupe","recomp","trap","param","sheet","regl"];
 function go(v,opts){
   VIEWS.forEach(k=>$("view-"+k).classList.toggle("hidden",k!==v));
   document.querySelectorAll("nav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
@@ -1102,6 +1152,7 @@ function go(v,opts){
   if(v==="groupe")renderGroupe();
   if(v==="recomp")renderRecomp();
   if(v==="param")renderParam();
+  if(v==="trap")renderTrap();
   if(v==="session"&&!(opts&&opts.keep))prepareForm(opts&&opts.session);
   window.scrollTo(0,0);
 }
@@ -1515,7 +1566,10 @@ function workbookSheets(){
     {name:"Armes",rows:armes,widths:[26,12,11]},
     {name:"Catalogue",rows:cat,widths:[26,26,12]},
     {name:"Reglages",rows:regl,widths:[16,40]},
-    {name:"Resume",rows:resume,widths:[26,16,10,10,10],headRows:headRows}
+    {name:"Resume",rows:resume,widths:[26,16,10,10,10],headRows:headRows},
+    {name:"BallTrap",rows:[["Serie_ID","Date","Discipline","Lieu","Arme","Tir_no","Resultat","Precision","Cartouche","Choke","Distance_m","Poste","Plateau"]].concat(
+      (DB.balltrap||[]).flatMap(se=>(se.tirs||[]).map((t,i)=>[se.id,se.date||"",se.discipline||"",se.lieu||"",se.arme||"",i+1,(BT_RES[t.r]||[t.r])[0],btQLabel(t.q),t.cart||"",t.choke||"",t.dist||"",t.poste||"",t.plateau||""]))),
+      widths:[16,12,20,22,20,7,16,14,24,12,11,7,12]}
   ];
 }
 function exportXlsx(){download("chasse-note-"+stamp()+".xlsx",new Blob([buildXlsx(workbookSheets())],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));}
@@ -1667,7 +1721,7 @@ async function applyImported(res,label){
   if(mode==="replace"){
     const settings=Object.assign({},DB.settings,res.settings||{});
     if(res.armes)settings.armes=res.armes;if(res.cat)settings.especesCustom=res.cat;
-    DB=migrate({settings:settings,sessions:res.sessions,passages:res.passages,meta:DB.meta});
+    DB=migrate({settings:settings,sessions:res.sessions,passages:res.passages,balltrap:res.balltrap||DB.balltrap,meta:DB.meta});
   }else{
     mergeInto(res);
   }
@@ -1677,6 +1731,8 @@ async function applyImported(res,label){
   const cur=VIEWS.find(v=>!$("view-"+v).classList.contains("hidden"))||"dash";go(cur==="session"?"dash":cur);
 }
 function mergeInto(res){
+    if(!Array.isArray(DB.balltrap))DB.balltrap=[];
+    (res.balltrap||[]).forEach(b=>{const i=DB.balltrap.findIndex(x=>x.id===b.id);if(i<0)DB.balltrap.push(b);else if((b.tirs||[]).length>(DB.balltrap[i].tirs||[]).length)DB.balltrap[i]=b;});
     res.sessions.forEach(s=>{const i=DB.sessions.findIndex(x=>x.id===s.id);if(i>=0)DB.sessions[i]=s;else DB.sessions.push(s);});
     Object.keys(res.passages).forEach(d=>{const a=DB.passages[d],b=res.passages[d];DB.passages[d]={nombre:Math.max(a?Number(a.nombre||0):0,Number(b.nombre||0)),note:b.note||(a&&a.note)||""};});
     (res.armes||[]).forEach(a=>{if(!DB.settings.armes.some(x=>norm(x.nom)===norm(a.nom)))DB.settings.armes.push(Object.assign({},a,{principale:DB.settings.armes.length?false:a.principale}));});
@@ -1691,7 +1747,7 @@ function parseBackup(raw){
   if(data&&data.carnet)data=data.carnet;
   if(!data||typeof data!=="object"||(!data.sessions&&!data.settings&&!data.passages))throw new Error("format");
   const m=migrate(data);
-  return{sessions:m.sessions,passages:m.passages,settings:data.settings?m.settings:null,armes:data.settings?m.settings.armes:null,cat:data.settings?m.settings.especesCustom:null};
+  return{sessions:m.sessions,passages:m.passages,balltrap:m.balltrap,settings:data.settings?m.settings:null,armes:data.settings?m.settings.armes:null,cat:data.settings?m.settings.especesCustom:null};
 }
 async function importFile(f){
   if(!f)return;
@@ -1837,7 +1893,7 @@ async function afterLogin(){
         else if(c==="local"){DB.meta.owner=USER.id;DB.meta.dirty=true;DB.meta.maj=Date.now();persist();await pushNow();}
         else{
           const local=DB;adopt(row);
-          mergeInto({sessions:local.sessions,passages:local.passages,armes:local.settings.armes,cat:local.settings.especesCustom,settings:local.settings});
+          mergeInto({sessions:local.sessions,passages:local.passages,balltrap:local.balltrap,armes:local.settings.armes,cat:local.settings.especesCustom,settings:local.settings});
           save();await pushNow();toast("Carnets fusionnés");
         }
       }
@@ -2965,6 +3021,155 @@ function bindParam(){
   };
 }
 function renderParamBuilder(){const box=$("pBuilder");if(!box)return;const head=box.querySelector(".panel-head").outerHTML;box.innerHTML=head+builderHTML();bindParam();}
+
+/* ================== BALL-TRAP : saisie tir par tir ================== */
+const BT_DISC=["Parcours de chasse","Compak sporting","Fosse olympique","Fosse universelle","DTL","Skeet","Entraînement libre"];
+const BT_CHOKES=["Cylindre","1/4 (IC)","1/2 (M)","3/4 (IM)","Full","Super full"];
+const BT_DIST=[10,15,20,25,30,35,40,45];
+const BT_PLATEAUX=["Standard","Mini","Midi","Battue","Lapin","Fumigène"];
+const BT_RES={c1:["Cassé 1er coup","ok"],c2:["Cassé 2e coup","ok2"],m:["Manqué","ko"]};
+const BT_Q_HIT=[["pulverise","Pulvérisé"],["casse","Cassé"],["ebreche","Ébréché"]];
+const BT_Q_MISS=[["devant","Devant"],["derriere","Derrière"],["dessus","Dessus"],["dessous","Dessous"],["nsp","Je ne sais pas"]];
+let BT_ID=null;
+function btList(){if(!Array.isArray(DB.balltrap))DB.balltrap=[];return DB.balltrap;}
+function btCfg(){DB.settings.trap=Object.assign({cart:"",choke:"1/2 (M)",dist:25,poste:1,plateau:"Standard",autoPoste:false},DB.settings.trap||{});return DB.settings.trap;}
+function btSerie(){return btList().find(x=>x.id===BT_ID)||null;}
+function btHit(t){return t.r==="c1"||t.r==="c2";}
+function btScore(tirs){const n=tirs.length,h=tirs.filter(btHit).length;return{n:n,h:h,c2:tirs.filter(t=>t.r==="c2").length,pct:n?Math.round(h/n*100):0};}
+function btQLabel(q){const x=BT_Q_HIT.concat(BT_Q_MISS).find(a=>a[0]===q);return x?x[1]:"";}
+function btCartouches(){
+  const s=new Set();btList().forEach(se=>(se.tirs||[]).forEach(t=>{if(t.cart)s.add(t.cart);}));
+  if(btCfg().cart)s.add(btCfg().cart);return Array.from(s).sort((a,b)=>a.localeCompare(b,"fr"));
+}
+function btGroupBars(tirs,key,fmt,order){
+  const g={};tirs.forEach(t=>{const k=t[key];if(k===""||k==null)return;(g[k]=g[k]||[]).push(t);});
+  let keys=Object.keys(g);
+  if(order)keys.sort((a,b)=>order(a)-order(b));else keys.sort((a,b)=>g[b].length-g[a].length);
+  if(!keys.length)return'<div class="empty" style="padding:14px">Pas encore de tirs.</div>';
+  return'<div class="bt-bars">'+keys.map(k=>{const s=btScore(g[k]);return'<div class="chart-row" title="'+esc((fmt?fmt(k):k)+" : "+s.h+" cassé(s) sur "+s.n+" tir(s)")+'"><div class="chart-label">'+esc(fmt?fmt(k):k)+'</div><div class="chart-track"><span style="width:'+s.pct+'%"></span></div><div class="chart-val">'+s.pct+' %<small> '+s.h+'/'+s.n+'</small></div></div>';}).join("")+'</div>';
+}
+function btStatsPanels(tirs,titre){
+  const misses=tirs.filter(t=>t.r==="m"&&t.q&&t.q!=="nsp"),mc={};misses.forEach(t=>{mc[t.q]=(mc[t.q]||0)+1;});
+  const missTxt=Object.keys(mc).sort((a,b)=>mc[b]-mc[a]).map(k=>btQLabel(k)+" ("+mc[k]+")").join(" · ");
+  // meilleure combinaison cartouche + choke (5 tirs minimum)
+  const combo={};tirs.forEach(t=>{if(!t.cart||!t.choke)return;const k=t.cart+" · "+t.choke;(combo[k]=combo[k]||[]).push(t);});
+  const best=Object.entries(combo).filter(([k,v])=>v.length>=5).map(([k,v])=>({k,s:btScore(v)})).sort((a,b)=>b.s.pct-a.s.pct||b.s.n-a.s.n)[0];
+  return'<div class="split">'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-route")+'</span>Réussite par distance</h3><span class="meta">'+esc(titre)+'</span></div>'+btGroupBars(tirs,"dist",k=>k+" m",k=>Number(k))+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Réussite par choke</h3></div>'+btGroupBars(tirs,"choke",null,k=>{const i=BT_CHOKES.indexOf(k);return i<0?99:i;})+'</div>'+
+  '</div>'+
+  '<div class="split">'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-shell")+'</span>Réussite par cartouche</h3></div>'+btGroupBars(tirs,"cart")+
+      (best?'<div class="hint">Meilleure combinaison : <strong>'+esc(best.k)+'</strong> — '+best.s.pct+' % sur '+best.s.n+' tirs.</div>':'<div class="hint">La meilleure combinaison cartouche + choke s’affiche à partir de 5 tirs.</div>')+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-flag")+'</span>Réussite par type de plateau</h3></div>'+btGroupBars(tirs,"plateau")+
+      (missTxt?'<div class="hint">Tirs manqués : '+esc(missTxt)+'</div>':'')+'</div>'+
+  '</div>';
+}
+function renderTrap(){
+  const body=$("trapBody"),se=btSerie();
+  if(!se)return renderTrapList(body);
+  const C=btCfg(),sc=btScore(se.tirs),obj=Math.max(se.objectif||0,se.tirs.length);
+  const last=se.tirs[se.tirs.length-1];
+  const armes=(DB.settings.armes||[]).map(a=>a.nom).filter(Boolean);
+  const dots=Array.from({length:obj},(_,i)=>{const t=se.tirs[i];return'<span class="btdot'+(t?(t.r==="m"?" ko":t.r==="c2"?" ok2":" ok"):"")+'" title="'+(t?"Tir "+(i+1)+" : "+BT_RES[t.r][0]:"Tir "+(i+1))+'"></span>';}).join("");
+  const rows=se.tirs.map((t,i)=>({t,i})).reverse().map(({t,i})=>'<tr><td class="num">'+(i+1)+'</td><td><span class="btres '+BT_RES[t.r][1]+'">'+BT_RES[t.r][0]+'</span>'+(t.q?'<small>'+esc(btQLabel(t.q))+'</small>':"")+'</td>'+
+    '<td>'+esc(t.cart||"—")+'</td><td>'+esc(t.choke||"—")+'</td><td class="num">'+(t.dist?t.dist+" m":"—")+'</td><td class="num">'+(t.poste||"—")+'</td><td>'+esc(t.plateau||"—")+'</td>'+
+    '<td><button class="btn icon sm ghost" data-btdel="'+i+'" title="Supprimer ce tir">'+ico("i-trash")+'</button></td></tr>').join("");
+  body.innerHTML=
+    '<div class="panel bt-score"><div class="bt-score-top"><div><div class="kicker" style="margin:0">'+esc(se.discipline||"Série")+' · '+esc(fmtDateLong(se.date))+'</div>'+
+      '<div class="bt-big"><span>'+sc.h+'</span> / '+sc.n+'<em>'+(sc.n?sc.pct+" %":"")+'</em></div>'+
+      '<div class="hint" style="margin:0">'+sc.c2+' au 2e coup · objectif '+(se.objectif||"libre")+'</div></div>'+
+      '<div class="btn-row" style="margin:0"><button class="btn" id="btBack">'+ico("i-hist")+'Mes séries</button></div></div>'+
+      '<div class="btdots">'+dots+'</div></div>'+
+    '<div class="panel bt-shoot"><div class="panel-head"><h3><span class="ico">'+ico("i-target")+'</span>Tir n° '+(se.tirs.length+1)+'</h3><span class="meta">Réglages repris à chaque tir</span></div>'+
+      '<div class="fgrid">'+
+        '<label class="field s2 s2m"><span class="n">Cartouche</span><input id="btCart" list="btCartList" value="'+esc(C.cart)+'" placeholder="Ex. Fiocchi 24 g n°7,5" /><datalist id="btCartList">'+btCartouches().map(c=>'<option value="'+esc(c)+'">').join("")+'</datalist></label>'+
+        '<label class="field"><span class="n">Type de plateau</span><select id="btPlat">'+BT_PLATEAUX.map(p=>'<option'+(p===C.plateau?" selected":"")+'>'+p+'</option>').join("")+'</select></label>'+
+        '<div class="field"><span class="n-lbl">Poste</span><div class="stepper"><button type="button" id="btPm">−</button><input type="number" id="btPoste" min="1" value="'+(C.poste||1)+'" inputmode="numeric" /><button type="button" id="btPp">+</button></div></div>'+
+      '</div>'+
+      '<div class="field"><span class="n-lbl">Choke</span><div class="btchips" id="btChokes">'+BT_CHOKES.map(c=>'<button type="button" class="chip'+(c===C.choke?" on":"")+'" data-choke="'+esc(c)+'">'+esc(c)+'</button>').join("")+'</div></div>'+
+      '<div class="field"><span class="n-lbl">Distance du tir</span><div class="btchips" id="btDists">'+BT_DIST.map(d=>'<button type="button" class="chip'+(Number(C.dist)===d?" on":"")+'" data-dist="'+d+'">'+d+' m</button>').join("")+
+        '<input type="number" id="btDist" min="1" max="80" value="'+esc(C.dist)+'" inputmode="numeric" class="btdist" title="Autre distance (m)" /></div></div>'+
+      '<div class="btshots"><button class="btshot ok" data-shot="c1">'+ico("i-check")+'<span>Cassé<small>1er coup</small></span></button>'+
+        '<button class="btshot ok2" data-shot="c2">'+ico("i-check")+'<span>Cassé<small>2e coup</small></span></button>'+
+        '<button class="btshot ko" data-shot="m">'+ico("i-x")+'<span>Manqué<small>plateau entier</small></span></button></div>'+
+      (last?'<div class="btlast"><span>Dernier tir ('+se.tirs.length+') : <strong class="btres '+BT_RES[last.r][1]+'">'+BT_RES[last.r][0]+'</strong> — préciser :</span><div class="btchips">'+
+        (btHit(last)?BT_Q_HIT:BT_Q_MISS).map(([k,l])=>'<button type="button" class="chip'+(last.q===k?" on":"")+'" data-q="'+k+'">'+l+'</button>').join("")+
+        '</div><button class="btn sm ghost" id="btUndo">'+ico("i-trash")+'Annuler ce tir</button></div>':'')+
+    '</div>'+
+    btStatsPanels(se.tirs,"cette série")+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-list")+'</span>Détail des tirs</h3><span class="meta">'+se.tirs.length+' tir(s)</span></div>'+
+      (rows?'<div class="scroll"><table><thead><tr><th class="num">N°</th><th>Résultat</th><th>Cartouche</th><th>Choke</th><th class="num">Dist.</th><th class="num">Poste</th><th>Plateau</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">Touchez « Cassé » ou « Manqué » pour enregistrer le premier tir.</div>')+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-set")+'</span>Informations de la série</h3></div>'+
+      '<div class="fgrid">'+
+        '<label class="field"><span class="n">Date</span><input type="date" id="btDate" value="'+esc(se.date)+'" /></label>'+
+        '<label class="field"><span class="n">Discipline</span><select id="btDisc">'+BT_DISC.map(d=>'<option'+(d===se.discipline?" selected":"")+'>'+d+'</option>').join("")+'</select></label>'+
+        '<label class="field s2 s2m"><span class="n">Stand / lieu</span><input id="btLieu" value="'+esc(se.lieu||"")+'" placeholder="Ex. Ball-trap de Langon" /></label>'+
+        '<label class="field s2 s2m"><span class="n">Arme</span><select id="btArme"><option value="">Non précisée</option>'+armes.map(a=>'<option'+(a===se.arme?" selected":"")+'>'+esc(a)+'</option>').join("")+'</select></label>'+
+        '<label class="field"><span class="n">Plateaux prévus</span><input type="number" id="btObj" min="0" step="5" value="'+(se.objectif||"")+'" inputmode="numeric" /></label>'+
+        '<label class="field s2 s2m"><span class="n">Notes</span><input id="btNotes" value="'+esc(se.notes||"")+'" placeholder="Météo, sensations…" /></label>'+
+      '</div><div class="btn-row"><button class="btn danger" id="btDelSerie">'+ico("i-trash")+'Supprimer la série</button><button class="btn primary" id="btDone">'+ico("i-check")+'Terminer la série</button></div></div>';
+  bindTrap(se);
+}
+function bindTrap(se){
+  const C=btCfg();
+  const keep=()=>{C.cart=$("btCart").value.trim();C.plateau=$("btPlat").value;C.poste=Math.max(1,Number($("btPoste").value||1));C.dist=Number($("btDist").value||0)||C.dist;};
+  $("btBack").onclick=()=>{keep();save();BT_ID=null;renderTrap();};
+  $("btCart").onchange=()=>{keep();save();};
+  $("btPlat").onchange=()=>{keep();save();};
+  $("btPoste").onchange=()=>{keep();save();};
+  $("btPm").onclick=()=>{$("btPoste").value=Math.max(1,Number($("btPoste").value||1)-1);keep();save();};
+  $("btPp").onclick=()=>{$("btPoste").value=Number($("btPoste").value||1)+1;keep();save();};
+  $("btChokes").onclick=e=>{const b=e.target.closest("[data-choke]");if(!b)return;C.choke=b.dataset.choke;$("btChokes").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));save();};
+  $("btDists").onclick=e=>{const b=e.target.closest("[data-dist]");if(!b)return;C.dist=Number(b.dataset.dist);$("btDist").value=C.dist;$("btDists").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));save();};
+  $("btDist").onchange=()=>{C.dist=Number($("btDist").value||0);$("btDists").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",Number(x.dataset.dist)===C.dist));save();};
+  document.querySelectorAll("#trapBody [data-shot]").forEach(b=>b.onclick=()=>{
+    keep();
+    se.tirs.push({id:uid(),r:b.dataset.shot,q:"",cart:C.cart,choke:C.choke,dist:Number(C.dist)||null,poste:C.poste,plateau:C.plateau,t:new Date().toISOString()});
+    if(navigator.vibrate)try{navigator.vibrate(b.dataset.shot==="m"?[40,40,40]:30);}catch(e){}
+    save();renderTrap();
+  });
+  document.querySelectorAll("#trapBody [data-q]").forEach(b=>b.onclick=()=>{const t=se.tirs[se.tirs.length-1];if(!t)return;t.q=t.q===b.dataset.q?"":b.dataset.q;save();renderTrap();});
+  if($("btUndo"))$("btUndo").onclick=()=>{se.tirs.pop();save();renderTrap();toast("Dernier tir annulé");};
+  document.querySelectorAll("#trapBody [data-btdel]").forEach(b=>b.onclick=async()=>{
+    const i=Number(b.dataset.btdel);if(!(await confirmBox("Supprimer le tir n° "+(i+1)+" ?","Les tirs suivants seront renumérotés.","Supprimer")))return;
+    se.tirs.splice(i,1);save();renderTrap();
+  });
+  const meta=()=>{se.date=$("btDate").value||se.date;se.discipline=$("btDisc").value;se.lieu=$("btLieu").value.trim();se.arme=$("btArme").value;se.objectif=Number($("btObj").value||0);se.notes=$("btNotes").value.trim();save();};
+  ["btDate","btDisc","btLieu","btArme","btObj","btNotes"].forEach(id=>$(id).onchange=()=>{meta();if(id==="btObj"||id==="btDisc"||id==="btDate")renderTrap();});
+  $("btDone").onclick=()=>{meta();BT_ID=null;renderTrap();const s=btScore(se.tirs);toast("Série enregistrée : "+s.h+" / "+s.n);};
+  $("btDelSerie").onclick=async()=>{
+    if(!(await confirmBox("Supprimer cette série ?",se.tirs.length+" tir(s) seront supprimés. Cette action est définitive.","Supprimer")))return;
+    DB.balltrap=btList().filter(x=>x.id!==se.id);BT_ID=null;save();renderTrap();toast("Série supprimée");
+  };
+}
+function renderTrapList(body){
+  const list=btList().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id).localeCompare(String(a.id)));
+  const all=list.flatMap(s=>s.tirs||[]),G=btScore(all);
+  const best=list.filter(s=>(s.tirs||[]).length>=10).map(s=>({s,sc:btScore(s.tirs)})).sort((a,b)=>b.sc.pct-a.sc.pct)[0];
+  const tile=(lbl,icon,val,sub)=>'<article class="stat"><div class="top"><span class="lbl">'+lbl+'</span><span class="ic">'+ico(icon)+'</span></div><div class="val">'+esc(val)+'</div><div class="sub">'+esc(sub)+'</div></article>';
+  const cards=list.map(s=>{const sc=btScore(s.tirs||[]),[y,m,d]=String(s.date||"").split("-");
+    return'<button class="s-card bt-card" data-open="'+esc(s.id)+'"><div class="dateblk"><span class="d">'+Number(d||0)+'</span><span class="m">'+(MOIS[Number(m)-1]||"")+'</span><span class="y">'+(y||"")+'</span></div>'+
+      '<div style="min-width:0;text-align:left"><div class="s-title">'+esc(s.discipline||"Série")+'</div><div class="s-meta">'+(s.lieu?'<span>'+ico("i-pin")+esc(s.lieu)+'</span>':"")+(s.arme?'<span>'+ico("i-cross")+esc(s.arme)+'</span>':"")+'<span>'+ico("i-target")+sc.n+' tir(s)</span></div>'+
+      '<div class="btdots sm">'+(s.tirs||[]).slice(0,50).map(t=>'<span class="btdot '+(t.r==="m"?"ko":t.r==="c2"?"ok2":"ok")+'"></span>').join("")+'</div></div>'+
+      '<div class="bt-cardscore"><strong>'+sc.h+'<small>/'+sc.n+'</small></strong><span>'+(sc.n?sc.pct+" %":"—")+'</span></div></button>';}).join("");
+  body.innerHTML=
+    '<div class="grid">'+tile("Plateaux cassés","i-target",G.h,"sur "+G.n+" tir(s)")+tile("Réussite","i-ratio",G.n?G.pct+" %":"—",G.c2+" au 2e coup")+
+      tile("Séries","i-hist",list.length,list[0]?"dernière le "+fmtDateLong(list[0].date):"aucune pour l’instant")+
+      tile("Meilleure série","i-trophy",best?best.sc.pct+" %":"—",best?best.sc.h+"/"+best.sc.n+" · "+fmtDateLong(best.s.date):"à partir de 10 tirs")+'</div>'+
+    '<div class="panel"><div class="panel-head"><h3><span class="ico">'+ico("i-hist")+'</span>Mes séries</h3><button class="btn gold" id="btNew2">'+ico("i-plus")+'Nouvelle série</button></div>'+
+      (cards?'<div class="bt-list">'+cards+'</div>':'<div class="empty">'+ico("i-target")+'Aucune série enregistrée. Commencez une série pour saisir chaque tir : résultat, cartouche, choke et distance.</div>')+'</div>'+
+    (all.length?btStatsPanels(all,"toutes séries"):"");
+  $("btNew2").onclick=newTrapSerie;
+  body.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{BT_ID=b.dataset.open;renderTrap();window.scrollTo({top:0,behavior:"smooth"});});
+}
+function newTrapSerie(){
+  const prev=btList().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  const arme=(DB.settings.armes||[]).find(a=>a.principale)||(DB.settings.armes||[])[0];
+  const s={id:uid(),date:todayISO(),discipline:prev?prev.discipline:"Parcours de chasse",lieu:prev?prev.lieu:"",arme:prev?prev.arme:(arme?arme.nom:""),objectif:25,notes:"",tirs:[]};
+  btList().push(s);BT_ID=s.id;btCfg().poste=1;save();go("trap");window.scrollTo({top:0});
+}
+$("btNew").onclick=newTrapSerie;
 
 /* ================== Démarrage ================== */
 applyTheme();applyFormCfg();prepareForm();renderDash();initCloud();renderAccount();
